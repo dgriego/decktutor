@@ -65,6 +65,7 @@
 <dialog class="modal small" id="importModal"><div class="mh"><div><div class="ey">DECK SOURCE</div><h2>Import a deck</h2></div><button class="x" data-close="importModal">×</button></div><p class="muted">Use a public Moxfield URL when available. If Moxfield blocks the request, paste its exported decklist instead. Card images and rules text come from Scryfall.</p><label class="label">Public Moxfield URL</label><div class="importrow"><input class="input" id="moxUrl" placeholder="https://moxfield.com/decks/..."><button class="btn primary" id="moxBtn">Import URL</button></div><div class="importmsg" id="importMsg"></div><label class="label">Paste decklist</label><textarea class="textarea" id="deckText" placeholder="1 Sol Ring&#10;1 Arcane Signet&#10;...&#10;&#10;COMMANDER:&#10;1 Glarb, Calamity's Augur"></textarea><button class="btn primary" style="margin-top:8px" id="pasteBtn">Use pasted decklist</button></dialog>
 <dialog class="modal small" id="routesModal"><div class="mh"><div><div class="ey">CORE COMBOS</div><h2>Win routes</h2></div><button class="x" data-close="routesModal">×</button></div><div id="routeLibrary"></div></dialog>
 <script src="/app.js"></script>
+<script src="/mana-evaluator.js"></script>
 <script src="/enhancements.js"></script>
 <script src="/hover-preview.js"></script>
 </body>
