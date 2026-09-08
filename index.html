@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Glarb Deck Tutor</title>
+  <title>Deck Tutor</title>
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/hover-preview.css">
   <link rel="stylesheet" href="/coach-readable.css">
 </head>
 <body>
 <header class="top">
-  <div class="brand"><div class="logo">G</div><div><div class="ey">DECK TUTOR</div><h1 id="title">Glarb, Calamity's Augur</h1></div></div>
+  <div class="brand"><div class="logo">D</div><div><div class="ey">DECK TUTOR</div><h1 id="title">Deck Tutor</h1><div class="status">Loaded deck: <span id="deckContext">Glarb, Calamity's Augur</span></div></div></div>
   <div class="acts"><span class="status" id="metaStatus">Loading card data…</span><button class="btn" id="importBtn">Import Deck</button><button class="btn" id="newBtn">New Hand</button><button class="btn primary" id="routesBtn">Win Routes</button></div>
 </header>
 <main class="app">
@@ -25,11 +25,11 @@
       <aside class="board-rail">
         <section class="zone commander-zone">
           <div class="zh">COMMANDER</div>
-          <div class="cmd"><div id="cmdCard" class="placeholder">Loading Glarb…</div><button class="btn" style="width:100%;margin-top:8px" id="cmdBtn">Move to battlefield</button></div>
+          <div class="cmd"><div id="cmdCard" class="placeholder">Loading commander…</div><button class="btn" style="width:100%;margin-top:8px" id="cmdBtn">Move to battlefield</button></div>
         </section>
         <section class="zone library-zone">
           <div class="zh">LIBRARY</div>
-          <div class="library-stack"><div class="cardback"><span>G</span></div><strong id="libLarge">92</strong><small>cards remaining</small><button class="btn" id="drawBtn">Draw 1</button></div>
+          <div class="library-stack"><div class="cardback"><span>D</span></div><strong id="libLarge">92</strong><small>cards remaining</small><button class="btn" id="drawBtn">Draw 1</button></div>
         </section>
         <section class="zone grave-zone dropzone" data-drop="grave">
           <div class="zh"><span>GRAVEYARD</span><span id="graveRailCount">0</span></div>
@@ -61,12 +61,13 @@
   </aside>
 </main>
 
-<dialog class="modal" id="cardModal"><div class="mh"><div><div class="ey" id="role"></div><h2 id="cardName"></h2></div><button class="x" data-close="cardModal">×</button></div><div class="detail"><div id="bigImage"></div><div><div class="facts" id="facts"></div><div class="oracle" id="oracle"></div><div class="note"><div class="ey">GLARB COACH NOTE</div><p id="note"></p></div><div class="dialogacts" id="cardActions"></div></div></div></dialog>
+<dialog class="modal" id="cardModal"><div class="mh"><div><div class="ey" id="role"></div><h2 id="cardName"></h2></div><button class="x" data-close="cardModal">×</button></div><div class="detail"><div id="bigImage"></div><div><div class="facts" id="facts"></div><div class="oracle" id="oracle"></div><div class="note"><div class="ey">DECK COACH NOTE</div><p id="note"></p></div><div class="dialogacts" id="cardActions"></div></div></div></dialog>
 <dialog class="modal small" id="importModal"><div class="mh"><div><div class="ey">DECK SOURCE</div><h2>Import a deck</h2></div><button class="x" data-close="importModal">×</button></div><p class="muted">Use a public Moxfield URL when available. If Moxfield blocks the request, paste its exported decklist instead. Card images and rules text come from Scryfall.</p><label class="label">Public Moxfield URL</label><div class="importrow"><input class="input" id="moxUrl" placeholder="https://moxfield.com/decks/..."><button class="btn primary" id="moxBtn">Import URL</button></div><div class="importmsg" id="importMsg"></div><label class="label">Paste decklist</label><textarea class="textarea" id="deckText" placeholder="1 Sol Ring&#10;1 Arcane Signet&#10;...&#10;&#10;COMMANDER:&#10;1 Glarb, Calamity's Augur"></textarea><button class="btn primary" style="margin-top:8px" id="pasteBtn">Use pasted decklist</button></dialog>
 <dialog class="modal small" id="routesModal"><div class="mh"><div><div class="ey">CORE COMBOS</div><h2>Win routes</h2></div><button class="x" data-close="routesModal">×</button></div><div id="routeLibrary"></div></dialog>
 <script src="/app.js"></script>
 <script src="/mana-evaluator.js"></script>
 <script src="/enhancements.js"></script>
 <script src="/hover-preview.js"></script>
+<script src="/branding.js"></script>
 </body>
 </html>
