@@ -1,5 +1,68 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Glarb Deck Tutor</title><link rel="stylesheet" href="/styles.css"></head><body><header class="top"><div class="brand"><div class="logo">G</div><div><div class="ey">DECK TUTOR</div><h1 id="title">Glarb, Calamity's Augur</h1></div></div><div class="acts"><span class="status" id="metaStatus">Loading card data…</span><button class="btn" id="importBtn">Import Deck</button><button class="btn" id="newBtn">New Hand</button><button class="btn primary" id="routesBtn">Win Routes</button></div></header><main class="app"><section class="table"><div class="stats"><span id="gameStatus">Opening hand practice</span><span><b id="lib">92</b> library · <b id="mulls">0</b> mulligans</span></div><div class="zones"><section class="zone handzone"><div class="zh hand-title"><div><span>YOUR OPENING HAND</span><span class="hand-subtitle">Read these seven before anything else</span></div><div class="acts"><button class="btn" id="drawBtn">Draw 1</button><button class="btn" id="mullBtn">Mulligan</button></div></div><div class="cards hand" id="hand"></div></section><section class="zone commander-zone"><div class="zh">COMMANDER</div><div class="cmd"><div id="cmdCard" class="placeholder">Loading Glarb…</div><button class="btn" style="width:100%;margin-top:8px" id="cmdBtn">Move to battlefield</button></div></section><section class="zone field"><div class="zh"><span>BATTLEFIELD</span><span>click cards</span></div><div class="cards" id="field"></div></section></div></section><aside class="coach"><div class="ey">COACH MODE</div><h2>Read the hand</h2><section class="box" id="quiz"><div class="muted">Make your call first.</div><h3>Would you keep this?</h3><div class="row"><button class="btn" data-d="keep">Keep</button><button class="btn" data-d="mulligan">Mulligan</button></div><button class="link" id="reveal">Reveal analysis</button></section><div id="analysis" class="hidden"><section class="box"><div class="score"><div><div class="ey">HAND QUALITY</div><strong id="verdict"></strong></div><div class="num" id="score"></div></div><p class="muted" id="summary"></p></section><section class="box"><b>Why this hand matters</b><div id="signals"></div></section><section class="box"><b>Routes you can build toward</b><div id="routes"></div></section><section class="box"><b>What to find next</b><p class="muted" id="next"></p></section></div></aside></main>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Glarb Deck Tutor</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">G</div><div><div class="ey">DECK TUTOR</div><h1 id="title">Glarb, Calamity's Augur</h1></div></div>
+  <div class="acts"><span class="status" id="metaStatus">Loading card data…</span><button class="btn" id="importBtn">Import Deck</button><button class="btn" id="newBtn">New Hand</button><button class="btn primary" id="routesBtn">Win Routes</button></div>
+</header>
+<main class="app">
+  <section class="table">
+    <div class="stats"><span id="gameStatus">Opening hand practice</span><span><b id="lib">92</b> library · <b id="graveCount">0</b> graveyard · <b id="mulls">0</b> mulligans</span></div>
+    <div class="playmat">
+      <section class="zone field-zone dropzone" data-drop="field">
+        <div class="zh"><span>BATTLEFIELD</span><span>drag cards here to play them</span></div>
+        <div class="cards field-cards" id="field"></div>
+      </section>
+
+      <aside class="board-rail">
+        <section class="zone commander-zone">
+          <div class="zh">COMMANDER</div>
+          <div class="cmd"><div id="cmdCard" class="placeholder">Loading Glarb…</div><button class="btn" style="width:100%;margin-top:8px" id="cmdBtn">Move to battlefield</button></div>
+        </section>
+        <section class="zone library-zone">
+          <div class="zh">LIBRARY</div>
+          <div class="library-stack"><div class="cardback"><span>G</span></div><strong id="libLarge">92</strong><small>cards remaining</small><button class="btn" id="drawBtn">Draw 1</button></div>
+        </section>
+        <section class="zone grave-zone dropzone" data-drop="grave">
+          <div class="zh"><span>GRAVEYARD</span><span id="graveRailCount">0</span></div>
+          <div class="cards grave-cards" id="grave"></div>
+        </section>
+      </aside>
+
+      <section class="zone handzone dropzone" data-drop="hand">
+        <div class="zh hand-title"><div><span>YOUR HAND</span><span class="hand-subtitle">Hover to inspect · drag to play · click for full details</span></div><div class="acts"><button class="btn" id="mullBtn">Mulligan</button></div></div>
+        <div class="cards hand" id="hand"></div>
+      </section>
+    </div>
+  </section>
+
+  <aside class="coach">
+    <section id="contextCoach" class="context-coach hidden">
+      <div class="ey">LIVE CARD CONTEXT</div>
+      <div class="context-head"><div><h2 id="contextName"></h2><div class="context-facts" id="contextFacts"></div></div><span class="context-role" id="contextRole"></span></div>
+      <p class="context-oracle" id="contextOracle"></p>
+      <div class="context-note" id="contextNote"></div>
+      <div id="contextSections"></div>
+    </section>
+
+    <section id="defaultCoach">
+      <div class="ey">COACH MODE</div><h2>Read the hand</h2>
+      <section class="box" id="quiz"><div class="muted">Make your call first.</div><h3>Would you keep this?</h3><div class="row"><button class="btn" data-d="keep">Keep</button><button class="btn" data-d="mulligan">Mulligan</button></div><button class="link" id="reveal">Reveal analysis</button></section>
+      <div id="analysis" class="hidden"><section class="box"><div class="score"><div><div class="ey">HAND QUALITY</div><strong id="verdict"></strong></div><div class="num" id="score"></div></div><p class="muted" id="summary"></p></section><section class="box"><b>Why this hand matters</b><div id="signals"></div></section><section class="box"><b>Routes you can build toward</b><div id="routes"></div></section><section class="box"><b>What to find next</b><p class="muted" id="next"></p></section></div>
+    </section>
+  </aside>
+</main>
+
 <dialog class="modal" id="cardModal"><div class="mh"><div><div class="ey" id="role"></div><h2 id="cardName"></h2></div><button class="x" data-close="cardModal">×</button></div><div class="detail"><div id="bigImage"></div><div><div class="facts" id="facts"></div><div class="oracle" id="oracle"></div><div class="note"><div class="ey">GLARB COACH NOTE</div><p id="note"></p></div><div class="dialogacts" id="cardActions"></div></div></div></dialog>
 <dialog class="modal small" id="importModal"><div class="mh"><div><div class="ey">DECK SOURCE</div><h2>Import a deck</h2></div><button class="x" data-close="importModal">×</button></div><p class="muted">Use a public Moxfield URL when available. If Moxfield blocks the request, paste its exported decklist instead. Card images and rules text come from Scryfall.</p><label class="label">Public Moxfield URL</label><div class="importrow"><input class="input" id="moxUrl" placeholder="https://moxfield.com/decks/..."><button class="btn primary" id="moxBtn">Import URL</button></div><div class="importmsg" id="importMsg"></div><label class="label">Paste decklist</label><textarea class="textarea" id="deckText" placeholder="1 Sol Ring&#10;1 Arcane Signet&#10;...&#10;&#10;COMMANDER:&#10;1 Glarb, Calamity's Augur"></textarea><button class="btn primary" style="margin-top:8px" id="pasteBtn">Use pasted decklist</button></dialog>
 <dialog class="modal small" id="routesModal"><div class="mh"><div><div class="ey">CORE COMBOS</div><h2>Win routes</h2></div><button class="x" data-close="routesModal">×</button></div><div id="routeLibrary"></div></dialog>
-<script src="/app.js"></script></body></html>
+<script src="/app.js"></script>
+<script src="/enhancements.js"></script>
+</body>
+</html>
