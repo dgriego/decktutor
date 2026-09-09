@@ -25,3 +25,5 @@ Serve the repository root with any static server. The Moxfield importer runs fro
 ## Deployment
 
 Production is deployed from the `main` branch to the Vercel project `mtgline`.
+
+Production URL: https://mtgline.vercel.app
