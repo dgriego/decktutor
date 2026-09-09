@@ -147,3 +147,10 @@ test('failed printing lookup falls back by name, unresolved cards remain explici
   assert.equal(calls, 2); assert.equal(result['Test Printed Card'].mana, '{R}');
   assert.deepEqual(C.buildFacts(deck, result).missing, ['Unresolved Test Card']);
 });
+test('adventure collection names match all faces without accepting a different back face', async () => {
+  const deck = C.normalizeDeck({ cards: [{ name: 'Marang River Regent // Coil and Catch', quantity: 7 }, { name: 'Marang River Regent // Wrong Back', quantity: 1 }] });
+  const mockFetch = async () => ({ ok: true, json: async () => ({ data: [{ name: 'Marang River Regent // Coil and Catch // Marang River Regent', layout: 'adventure', cmc: 6, card_faces: [{ name: 'Marang River Regent', mana_cost: '{4}{U}{U}', type_line: 'Creature — Dragon', oracle_text: 'Flying' }, { name: 'Coil and Catch', mana_cost: '{2}{U}', type_line: 'Instant — Adventure', oracle_text: 'Draw cards.' }] }] }) });
+  const resolved = await resolveCards(deck, mockFetch);
+  assert.ok(resolved['Marang River Regent // Coil and Catch']);
+  assert.equal(resolved['Marang River Regent // Wrong Back'], undefined);
+});
