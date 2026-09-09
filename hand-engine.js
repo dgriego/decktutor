@@ -176,7 +176,7 @@
             next.push({ ...state, hand: state.hand.filter(c => c.id !== card.id), commanders: state.commanders.filter(c => c.id !== card.id),
               field: permanent ? [...state.field, played] : state.field,
               units: [...remaining, ...(!delayed ? units : [])], casts: [...state.casts, { name: card.name, turn }],
-              score: state.score + priority(card.name) * (5 - turn) + (isCommander ? 3 : 0),
+              score: state.score + priority(card.name) * (5 - turn) + (isCommander ? 12 * (profile.commanderDependency || 0) : 0),
               log: [...state.log.slice(0, -1), { ...last, spells: [...last.spells, card.name] }] });
           }
         }
@@ -235,9 +235,12 @@
       synergy: profile.source === 'ai' ? clamp(40 + synergies.length * 15 + (routes[0]?.have.length || 0) * 6) : null,
       resilience: clamp(30 + unique([...liveRole('engine'), ...liveRole('draw'), ...liveRole('recursion')]).length * 15 + liveRole('protection').length * 15)
     };
-    const weights = { mana: .28, sequencing: .22, castability: .16, cardFlow: .12, interaction: .09, synergy: .07, resilience: .06 };
-    if (profile.tempo === 'fast') { weights.sequencing += .04; weights.resilience -= .03; weights.interaction -= .01; }
+    const weights = { ...Core.HAND_WEIGHTS, ...profile.handWeights };
     let score = Math.round(Object.entries(weights).reduce((s, [key, weight]) => s + (scores[key] ?? 0) * weight, 0) / Object.entries(weights).reduce((s, [key, weight]) => s + (scores[key] === null ? 0 : weight), 0));
+    // The four-turn search cannot establish a turn-five-or-later failure.
+    const commanderTarget = profile.idealCommanderTurn || 3;
+    const commanderLate = commanderTarget <= 4 && deck.commanders.length > 0 && deck.commanders.every(c => !(options.commandersInPlay || []).includes(c.name) && !(sim.commandTurns[c.name] <= commanderTarget));
+    if (commanderLate) score = clamp(score - Math.round(20 * (profile.commanderDependency || 0)));
     if (!lands.length && !early.length && !(options.field || []).length) score = Math.min(18, score);
     const paidMulls = Math.max(0, (options.mulligans || 0) - (options.multiplayer ? 1 : 0));
     const threshold = Math.min(8, paidMulls * 3);

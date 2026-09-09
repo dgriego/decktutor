@@ -65,6 +65,19 @@ test('AI cannot invent deck cards, forge land roles, duplicate references, or in
   assert.throws(() => C.validateProfile({ ...ai, winRoutes: [{ name: 'Fake', cards: ['Missing Card'], steps: [], conditions: [], confidence: 'high' }] }, deck, metadata, facts), /outside this deck/);
   assert.throws(() => C.validateProfile({ ...ai, cards: [{ name: 'Guard', roles: ['made-up'], note: '' }] }, deck, metadata, facts), /role/);
 });
+test('strategy weights are validated and commander dependence changes the hand decision', () => {
+  const hand = ['Mountain', 'Mountain', 'Spark', 'Value', 'Value', 'Value', 'Value'];
+  const { deck, facts, profile } = setup(hand, ['White Lead']);
+  assert.throws(() => C.validateProfile({ ...profile, commanderDependency: 2 }, deck, metadata, facts), /commander priorities/);
+  assert.throws(() => C.validateProfile({ ...profile, handWeights: { ...profile.handWeights, mana: NaN } }, deck, metadata, facts), /weights/);
+  assert.throws(() => C.validateProfile({ ...profile, handWeights: Object.fromEntries(Object.keys(C.HAND_WEIGHTS).map(k => [k, 0])) }, deck, metadata, facts), /weights/);
+  const optional = C.validateProfile(profile, deck, metadata, facts);
+  const essential = { ...optional, commanderDependency: 1 };
+  assert.equal(H.evaluate(hand, deck, metadata, optional).score - H.evaluate(hand, deck, metadata, essential).score, 20);
+  const manaOnly = { ...optional, handWeights: Object.fromEntries(Object.keys(C.HAND_WEIGHTS).map(k => [k, Number(k === 'mana')])) };
+  const evaluated = H.evaluate(hand, deck, metadata, manaOnly);
+  assert.equal(evaluated.score, evaluated.scores.mana);
+});
 test('mana distinguishes red, white, and required colorless and handles hybrids', () => {
   const unit = colors => ({ colors });
   assert.equal(H.pay('{R}', [unit(['W'])]), null);

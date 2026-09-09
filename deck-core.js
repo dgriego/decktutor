@@ -5,7 +5,8 @@
   else root.DeckCore = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  const VERSION = 1;
+  const VERSION = 2;
+  const HAND_WEIGHTS = { mana: .28, sequencing: .22, castability: .16, cardFlow: .12, interaction: .09, synergy: .07, resilience: .06 };
   const COLORS = ['W', 'U', 'B', 'R', 'G'];
   const ROLES = ['land', 'ramp', 'draw', 'selection', 'tutor', 'interaction', 'protection', 'engine', 'payoff', 'recursion', 'enabler', 'utility'];
   const unique = a => [...new Set(a)];
@@ -131,6 +132,7 @@
     return { version: VERSION, source: 'rules', archetype: 'Card-data analysis',
       summary: 'Hand coaching uses the imported cards’ mana costs and rules text. AI strategy analysis is not available yet.',
       commanderRole: deck.commanders.length ? 'Commanders are evaluated using their printed mana costs.' : 'This deck has no command zone.',
+      commanderDependency: 0, idealCommanderTurn: 3, handWeights: { ...HAND_WEIGHTS },
       tempo: 'balanced', priorities: ['Develop usable mana', 'Find castable action and card flow'],
       cards: [...deck.cards, ...deck.commanders].map(c => ({ name: c.name, roles: facts.cardRoles[c.name], note: '' })),
       synergies: [], winRoutes: [], mulligan: { landsMin: 2, landsMax: 4, priorities: ['Mana access', 'Early plays', 'Card flow'] },
@@ -156,7 +158,13 @@
     const mulligan = raw.mulligan;
     if (!mulligan || !Number.isInteger(mulligan.landsMin) || !Number.isInteger(mulligan.landsMax) || mulligan.landsMin < 1 || mulligan.landsMax > 5 || mulligan.landsMin > mulligan.landsMax) throw Error('Invalid mulligan targets.');
     if (!['fast', 'balanced', 'slow'].includes(raw.tempo)) throw Error('Invalid deck tempo.');
+    const unit = n => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 1;
+    if (!unit(raw.commanderDependency) || !Number.isInteger(raw.idealCommanderTurn) || raw.idealCommanderTurn < 1 || raw.idealCommanderTurn > 8) throw Error('Invalid commander priorities.');
+    if (!raw.handWeights || Object.keys(HAND_WEIGHTS).some(k => !unit(raw.handWeights[k])) || Object.keys(HAND_WEIGHTS).reduce((s, k) => s + raw.handWeights[k], 0) <= 0) throw Error('Invalid hand weights.');
+    const totalWeight = Object.keys(HAND_WEIGHTS).reduce((s, k) => s + raw.handWeights[k], 0);
+    const handWeights = Object.fromEntries(Object.keys(HAND_WEIGHTS).map(k => [k, raw.handWeights[k] / totalWeight]));
     return { version: VERSION, source: 'ai', archetype: string(raw.archetype, 120), summary: string(raw.summary),
+      commanderDependency: deck.commanders.length ? raw.commanderDependency : 0, idealCommanderTurn: raw.idealCommanderTurn, handWeights,
       commanderRole: string(raw.commanderRole), tempo: raw.tempo,
       priorities: array(raw.priorities, 6).map(s => string(s, 300)), cards,
       synergies: array(raw.synergies, 16).map(s => ({ cards: refs(s.cards, 2), explanation: string(s.explanation) })),
@@ -169,5 +177,5 @@
       limitations: array(raw.limitations, 8).map(s => string(s, 500)) };
   }
 
-  return { VERSION, COLORS, ROLES, unique, front, text, landFace, isLand, spellFace, normalizeDeck, parseList, compact, rolesFor, buildFacts, fallbackProfile, validateProfile };
+  return { VERSION, HAND_WEIGHTS, COLORS, ROLES, unique, front, text, landFace, isLand, spellFace, normalizeDeck, parseList, compact, rolesFor, buildFacts, fallbackProfile, validateProfile };
 });
