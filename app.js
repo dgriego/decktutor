@@ -107,7 +107,8 @@ function renderProfileStatus() {
   if (!loaded) { $('metaStatus').textContent = 'No deck loaded'; $('profileCard').classList.add('hidden'); return; }
   const { facts, ai, profile } = loaded;
   $('profileCard').classList.remove('hidden');
-  $('profileName').textContent = profile.archetype; $('profileSummary').textContent = profile.summary;
+  $('profileName').textContent = analyzing ? 'Analyzing your deck' : profile.archetype;
+  $('profileSummary').textContent = analyzing ? 'Resolving card data and reading your deck’s strategy, synergies, and mulligan priorities. Results will appear here automatically.' : facts.missing.length ? 'Deck and hand analysis are waiting for the unresolved card data listed below.' : profile.summary;
   $('profileFacts').textContent = `${facts.total} library cards · ${facts.lands} land options · ${facts.averageMV} average spell value`;
   $('metaStatus').textContent = importing ? 'Importing deck…' : analyzing ? 'Analyzing strategy…' : facts.missing.length ? `${facts.missing.length} unresolved cards` : ai.status === 'ready' ? 'AI profile ready' : 'Card data ready';
   $('profileState').textContent = analyzing ? 'AI is reading this deck’s strategy and interactions…' : ai.status === 'ready' ? `AI analysis · ${new Date(ai.analyzedAt).toLocaleDateString()}` : ai.message;
@@ -124,7 +125,7 @@ function renderCoach() {
   const ready = !!loaded && !loaded.facts.missing.length;
   let state = $('handAnalysisState');
   if (!state) { state = document.createElement('p'); state.id = 'handAnalysisState'; state.className = 'muted'; state.setAttribute('role', 'status'); $('defaultCoach').insertBefore(state, $('quiz')); }
-  state.textContent = !loaded ? '' : !ready ? `Hand analysis is waiting for card data: ${loaded.facts.missing.join(', ')}. Use Retry card lookup and analysis above.` : analyzing ? 'AI deck strategy is loading. You can reveal card-based hand coaching now; it updates when strategy is ready.' : loaded.ai.status === 'ready' ? 'Hand coaching uses your AI deck strategy, card rules, and the current hand. Reveal analysis below.' : 'Card-based hand coaching is available. Retry AI analysis to add deck-specific strategy.';
+  state.textContent = !loaded ? '' : !ready ? analyzing ? 'Repairing missing card data and analyzing deck strategy. Hand coaching will become available automatically.' : `Hand analysis is waiting for card data: ${loaded.facts.missing.join(', ')}. Use Retry card lookup and analysis above.` : analyzing ? 'AI deck strategy is loading. You can reveal card-based hand coaching now; it updates when strategy is ready.' : loaded.ai.status === 'ready' ? 'Hand coaching uses your AI deck strategy, card rules, and the current hand.' : 'Card-based hand coaching is available. Retry AI analysis to add deck-specific strategy.';
   $('quiz').classList.toggle('hidden', st.reveal && ready || !loaded);
   $('analysis').classList.toggle('hidden', !st.reveal || !ready);
   $('emptyCoach').classList.toggle('hidden', !!loaded);
@@ -240,6 +241,11 @@ $('retryAnalysis').onclick = () => void runAI();
 function renderDeckAnalysis() {
   if (!loaded) return;
   const { profile, facts } = loaded;
+  if (loaded.ai.status !== 'ready') {
+    $('routeLibrary').innerHTML = `<p role="status">${esc(analyzing ? 'Resolving cards and analyzing deck strategy… This view updates automatically.' : loaded.ai.message)}</p><h3>Deck composition</h3><p>${facts.total} library cards · ${facts.lands} known land options</p>${!analyzing && facts.missing.length ? `<p>Unresolved: ${facts.missing.map(esc).join(', ')}</p>` : ''}`;
+    const retry = document.createElement('button'); retry.className = 'btn'; retry.textContent = analyzing ? 'Analyzing…' : 'Retry card lookup and AI analysis'; retry.disabled = analyzing || importing; retry.onclick = () => void runAI(); $('routeLibrary').append(retry);
+    return;
+  }
   $('routeLibrary').innerHTML = `<h3>${esc(profile.archetype)}</h3><p>${esc(profile.summary)}</p><p>${esc(profile.commanderRole)}</p><h3>Opening priorities</h3><ul>${profile.priorities.map(p => `<li>${esc(p)}</li>`).join('')}</ul><h3>Deck composition</h3><p>${facts.total} library cards · ${facts.lands} land options (${facts.modalLands} modal) · ${facts.averageMV} average spell value</p><div class="deck-counts">${Object.entries(facts.counts).filter(([, n]) => n).map(([role, n]) => `<span>${esc(role)} <b>${n}</b></span>`).join('')}</div><p class="muted">Roles inferred from card text can overlap. Spell/land cards count in both relevant categories.</p><h3>Candidate win routes</h3>${routesHtml(currentAnalysis().routes)}<h3>Mulligan priorities</h3><ul>${profile.mulligan.priorities.map(p => `<li>${esc(p)}</li>`).join('')}</ul>${profile.limitations.length ? `<h3>Analysis limitations</h3><ul>${profile.limitations.map(p => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}`;
   const status = document.createElement('p'); status.setAttribute('role', 'status');
   status.textContent = analyzing ? 'Analyzing deck strategy… This view updates automatically.' : loaded.ai.status === 'ready' ? 'AI strategy ready · ' + loaded.ai.model : loaded.ai.message;
