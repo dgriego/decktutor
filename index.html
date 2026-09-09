@@ -56,7 +56,15 @@
     <section id="defaultCoach">
       <div class="ey">COACH MODE</div><h2>Read the hand</h2>
       <section class="box" id="quiz"><div class="muted">Make your call first.</div><h3>Would you keep this?</h3><div class="row"><button class="btn" data-d="keep">Keep</button><button class="btn" data-d="mulligan">Mulligan</button></div><button class="link" id="reveal">Reveal analysis</button></section>
-      <div id="analysis" class="hidden"><section class="box"><div class="score"><div><div class="ey">HAND QUALITY</div><strong id="verdict"></strong></div><div class="num" id="score"></div></div><p class="muted" id="summary"></p></section><section class="box"><b>Why this hand matters</b><div id="signals"></div></section><section class="box"><b>Routes you can build toward</b><div id="routes"></div></section><section class="box"><b>What to find next</b><p class="muted" id="next"></p></section></div>
+      <div id="analysis" class="hidden">
+        <section class="box"><div class="score"><div><div class="ey">HAND QUALITY</div><strong id="verdict"></strong></div><div class="num" id="score"></div></div><p class="muted" id="summary"></p></section>
+        <section class="box"><b>Best early line</b><div id="turnPlan" class="expert-turn-plan"></div></section>
+        <section class="box"><b>Expert scorecard</b><div id="scorecard" class="expert-scorecard"></div></section>
+        <section class="box"><b>Why this hand matters</b><div id="signals"></div></section>
+        <section class="box"><b>Risk & draw odds</b><div id="riskOdds" class="expert-risk-list"></div></section>
+        <section class="box"><b>Routes you can build toward</b><div id="routes"></div></section>
+        <section class="box"><b>What to find next</b><p class="muted" id="next"></p></section>
+      </div>
     </section>
   </aside>
 </main>
@@ -67,6 +75,7 @@
 <script src="/app.js"></script>
 <script src="/mana-evaluator.js"></script>
 <script src="/enhancements.js"></script>
+<script src="/expert-evaluator.js"></script>
 <script src="/hover-preview.js"></script>
 <script src="/branding.js"></script>
 </body>
