@@ -1,13 +1,13 @@
 (()=>{
   const baseRender=render;
   function applyBranding(){
-    document.title='Deckwise';
+    document.title='MTGLine';
     const title=$('title');
-    if(title) title.textContent='Deckwise';
+    if(title) title.textContent='MTGLine';
     const deckContext=$('deckContext');
     if(deckContext) deckContext.textContent=deckName;
     const logo=document.querySelector('.logo');
-    if(logo) logo.textContent='DW';
+    if(logo) logo.textContent='ML';
   }
   render=function(){
     baseRender();
