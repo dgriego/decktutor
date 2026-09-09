@@ -1,4 +1,4 @@
-# Deck Tutor
+# Deckwise
 
 Interactive Commander deck trainer focused on learning opening hands, sequencing, and win routes.
 
@@ -10,12 +10,13 @@ Glarb, Calamity's Augur
 
 - Randomized opening-hand practice
 - Keep/mulligan coaching
+- Mana-color and turn-sequencing evaluation
 - Win-route progress tracking
 - Real card art and Oracle text from Scryfall
 - Public Moxfield deck import with exact printing metadata when available
 - Paste-decklist fallback
 - Battlefield and commander simulation
-- Card-specific coaching notes
+- Card-specific contextual coaching and synergy hints
 
 ## Local development
 
