@@ -1,4 +1,4 @@
-# Deckwise
+# MTGLine
 
 Interactive Commander deck trainer focused on learning opening hands, sequencing, and win routes.
 
