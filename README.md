@@ -24,4 +24,4 @@ Serve the repository root with any static server. The Moxfield importer runs fro
 
 ## Deployment
 
-This repository is intended to deploy on Vercel from the `main` branch.
+Production is deployed from the `main` branch to the Vercel project `mtgline`.
