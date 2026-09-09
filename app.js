@@ -111,7 +111,8 @@ function renderProfileStatus() {
   $('profileFacts').textContent = `${facts.total} library cards · ${facts.lands} land options · ${facts.averageMV} average spell value`;
   $('metaStatus').textContent = importing ? 'Importing deck…' : analyzing ? 'Analyzing strategy…' : facts.missing.length ? `${facts.missing.length} unresolved cards` : ai.status === 'ready' ? 'AI profile ready' : 'Card data ready';
   $('profileState').textContent = analyzing ? 'AI is reading this deck’s strategy and interactions…' : ai.status === 'ready' ? `AI analysis · ${new Date(ai.analyzedAt).toLocaleDateString()}` : ai.message;
-  $('retryAnalysis').classList.toggle('hidden', ai.status === 'ready' || !!facts.missing.length);
+  $('retryAnalysis').classList.toggle('hidden', ai.status === 'ready');
+  $('retryAnalysis').textContent = analyzing ? 'Analyzing…' : facts.missing.length ? 'Retry card lookup and analysis' : 'Retry AI analysis';
   $('retryAnalysis').disabled = analyzing || importing;
   $('deckWarnings').textContent = [facts.missing.length ? `Unresolved cards: ${facts.missing.join(', ')}.` : '', facts.expectedTotal !== null && facts.total !== facts.expectedTotal ? `This ${loaded.deck.format} list has ${facts.total + loaded.deck.commanders.length} total cards; expected 100. Coaching uses the cards actually imported.` : ''].filter(Boolean).join(' ');
 }
@@ -121,6 +122,9 @@ function routesHtml(routes) {
 }
 function renderCoach() {
   const ready = !!loaded && !loaded.facts.missing.length;
+  let state = $('handAnalysisState');
+  if (!state) { state = document.createElement('p'); state.id = 'handAnalysisState'; state.className = 'muted'; state.setAttribute('role', 'status'); $('defaultCoach').insertBefore(state, $('quiz')); }
+  state.textContent = !loaded ? '' : !ready ? `Hand analysis is waiting for card data: ${loaded.facts.missing.join(', ')}. Use Retry card lookup and analysis above.` : analyzing ? 'AI deck strategy is loading. You can reveal card-based hand coaching now; it updates when strategy is ready.' : loaded.ai.status === 'ready' ? 'Hand coaching uses your AI deck strategy, card rules, and the current hand. Reveal analysis below.' : 'Card-based hand coaching is available. Retry AI analysis to add deck-specific strategy.';
   $('quiz').classList.toggle('hidden', st.reveal && ready || !loaded);
   $('analysis').classList.toggle('hidden', !st.reveal || !ready);
   $('emptyCoach').classList.toggle('hidden', !!loaded);
@@ -170,9 +174,10 @@ async function requestDeck(deck, analyze, signal) {
   return result;
 }
 async function runAI(id = generation) {
-  if (!loaded || loaded.facts.missing.length || analyzing) return;
+  if (!loaded || analyzing) return;
   const input = loaded.deck, fingerprint = loaded.fingerprint;
-  aiController = new AbortController(); analyzing = true; renderProfileStatus();
+  aiController = new AbortController(); analyzing = true; renderProfileStatus(); renderCoach();
+  if ($('routesModal').open) renderDeckAnalysis();
   try {
     const result = await requestDeck(input, true, AbortSignal.any([aiController.signal, AbortSignal.timeout(145000)]));
     if (id !== generation || loaded.fingerprint !== fingerprint) return;
@@ -180,7 +185,7 @@ async function runAI(id = generation) {
   } catch (e) {
     if (id !== generation) return;
     loaded.ai = { status: 'unavailable', message: e.name === 'TimeoutError' ? 'AI analysis took too long. Retry when ready.' : 'AI analysis could not finish. Retry when ready.' };
-  } finally { if (id === generation) { analyzing = false; renderProfileStatus(); renderCoach(); } }
+  } finally { if (id === generation) { analyzing = false; evaluationCache = null; clearContext(); render(); if ($('routesModal').open) renderDeckAnalysis(); } }
 }
 async function importDeck(input) {
   const id = ++generation; aiController?.abort(); analyzing = false; importing = true; setImportBusy(true);
@@ -232,12 +237,18 @@ document.querySelectorAll('[data-d]').forEach(button => button.onclick = () => {
 });
 $('gameMode').onchange = () => { evaluationCache = null; renderCoach(); };
 $('retryAnalysis').onclick = () => void runAI();
-$('routesBtn').onclick = () => {
+function renderDeckAnalysis() {
   if (!loaded) return;
   const { profile, facts } = loaded;
   $('routeLibrary').innerHTML = `<h3>${esc(profile.archetype)}</h3><p>${esc(profile.summary)}</p><p>${esc(profile.commanderRole)}</p><h3>Opening priorities</h3><ul>${profile.priorities.map(p => `<li>${esc(p)}</li>`).join('')}</ul><h3>Deck composition</h3><p>${facts.total} library cards · ${facts.lands} land options (${facts.modalLands} modal) · ${facts.averageMV} average spell value</p><div class="deck-counts">${Object.entries(facts.counts).filter(([, n]) => n).map(([role, n]) => `<span>${esc(role)} <b>${n}</b></span>`).join('')}</div><p class="muted">Roles inferred from card text can overlap. Spell/land cards count in both relevant categories.</p><h3>Candidate win routes</h3>${routesHtml(currentAnalysis().routes)}<h3>Mulligan priorities</h3><ul>${profile.mulligan.priorities.map(p => `<li>${esc(p)}</li>`).join('')}</ul>${profile.limitations.length ? `<h3>Analysis limitations</h3><ul>${profile.limitations.map(p => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}`;
-  $('routesModal').showModal();
-};
+  const status = document.createElement('p'); status.setAttribute('role', 'status');
+  status.textContent = analyzing ? 'Analyzing deck strategy… This view updates automatically.' : loaded.ai.status === 'ready' ? 'AI strategy ready · ' + loaded.ai.model : loaded.ai.message;
+  $('routeLibrary').prepend(status);
+  if (loaded.ai.status !== 'ready') {
+    const retry = document.createElement('button'); retry.className = 'btn'; retry.textContent = analyzing ? 'Analyzing…' : 'Retry card lookup and AI analysis'; retry.disabled = analyzing || importing; retry.onclick = () => void runAI(); $('routeLibrary').prepend(retry);
+  }
+}
+$('routesBtn').onclick = () => { if (!loaded) return; renderDeckAnalysis(); $('routesModal').showModal(); };
 document.querySelectorAll('[data-close]').forEach(button => button.onclick = () => $(button.dataset.close).close());
 document.querySelectorAll('.dropzone').forEach(el => {
   el.ondragover = e => { e.preventDefault(); el.classList.add('drag-over'); };
@@ -255,3 +266,4 @@ try {
   }
 } catch { loaded = null; }
 render();
+if (loaded && loaded.ai.status !== 'ready') void runAI();
