@@ -1,4 +1,8 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "functions": {
+    "api/analyze-deck.js": { "maxDuration": 180 },
+    "api/moxfield.js": { "maxDuration": 30 }
+  }
 }

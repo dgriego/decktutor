@@ -7,14 +7,22 @@
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/hover-preview.css">
   <link rel="stylesheet" href="/coach-readable.css">
+  <link rel="stylesheet" href="/workflow.css">
 </head>
 <body>
 <header class="top">
-  <div class="brand"><div class="logo">ML</div><div><div class="ey">MTGLINE</div><h1 id="title">MTGLine</h1><div class="status">Loaded deck: <span id="deckContext">Glarb, Calamity's Augur</span></div></div></div>
-  <div class="acts"><span class="status" id="metaStatus">Loading card data…</span><button class="btn" id="importBtn">Import Deck</button><button class="btn" id="newBtn">New Hand</button><button class="btn primary" id="routesBtn">Win Routes</button></div>
+  <div class="brand"><div class="logo">ML</div><div><div class="ey">MTGLINE</div><h1 id="title">MTGLine</h1><div class="status"><span id="deckContext">Import a deck to begin</span></div></div></div>
+  <div class="acts"><span class="status" id="metaStatus" role="status">No deck loaded</span><button class="btn" id="importBtn">Import Deck</button><button class="btn" id="newBtn" disabled>New Hand</button><button class="btn primary" id="routesBtn" disabled>Deck Analysis</button></div>
 </header>
 <main class="app">
   <section class="table">
+    <section id="profileCard" class="profile-card hidden">
+      <div class="ey" id="profileState" role="status"></div>
+      <h2 id="profileName"></h2><p id="profileSummary"></p><p id="profileFacts" class="muted"></p>
+      <p id="deckWarnings" class="deck-warning"></p><p id="saveStatus" class="muted"></p>
+      <button id="retryAnalysis" class="btn">Retry AI analysis</button>
+    </section>
+    <div class="practice-settings"><label for="gameMode">Game context</label><select id="gameMode" class="input"><option value="multiplayer">Multiplayer · first mulligan free</option><option value="play">Two players · on the play</option><option value="draw">Two players · on the draw</option></select></div>
     <div class="stats"><span id="gameStatus">Opening hand practice</span><span><b id="lib">92</b> library · <b id="graveCount">0</b> graveyard · <b id="mulls">0</b> mulligans</span></div>
     <div class="playmat">
       <section class="zone field-zone dropzone" data-drop="field">
@@ -25,7 +33,7 @@
       <aside class="board-rail">
         <section class="zone commander-zone">
           <div class="zh">COMMANDER</div>
-          <div class="cmd"><div id="cmdCard" class="placeholder">Loading commander…</div><button class="btn" style="width:100%;margin-top:8px" id="cmdBtn">Move to battlefield</button></div>
+          <div class="cmd"><div id="cmdCard" class="empty">No commander</div></div>
         </section>
         <section class="zone library-zone">
           <div class="zh">LIBRARY</div>
@@ -40,6 +48,8 @@
       <section class="zone handzone dropzone" data-drop="hand">
         <div class="zh hand-title"><div><span>YOUR HAND</span><span class="hand-subtitle">Hover to inspect · drag to play · click for full details</span></div><div class="acts"><button class="btn" id="mullBtn">Mulligan</button></div></div>
         <div class="cards hand" id="hand"></div>
+        <button class="btn hidden" id="keepHandBtn">Keep hand</button>
+        <p id="bottomNotice" class="bottom-notice" role="status"></p>
       </section>
     </div>
   </section>
@@ -55,10 +65,11 @@
 
     <section id="defaultCoach">
       <div class="ey">COACH MODE</div><h2>Read the hand</h2>
+      <section class="box" id="emptyCoach"><h3>Start with your deck</h3><p class="muted">Import from Moxfield or paste a decklist. Explore your deck’s plan, then practice opening hands and sequencing.</p><button class="btn primary" id="emptyImport">Import a deck</button></section>
       <section class="box" id="quiz"><div class="muted">Make your call first.</div><h3>Would you keep this?</h3><div class="row"><button class="btn" data-d="keep">Keep</button><button class="btn" data-d="mulligan">Mulligan</button></div><button class="link" id="reveal">Reveal analysis</button></section>
       <div id="analysis" class="hidden">
         <section class="box"><div class="score"><div><div class="ey">HAND QUALITY</div><strong id="verdict"></strong></div><div class="num" id="score"></div></div><p class="muted" id="summary"></p></section>
-        <section class="box"><b>Best early line</b><div id="turnPlan" class="expert-turn-plan"></div></section>
+        <section class="box"><b>Projected early line</b><div id="turnPlan" class="expert-turn-plan"></div></section>
         <section class="box"><b>Expert scorecard</b><div id="scorecard" class="expert-scorecard"></div></section>
         <section class="box"><b>Why this hand matters</b><div id="signals"></div></section>
         <section class="box"><b>Risk & draw odds</b><div id="riskOdds" class="expert-risk-list"></div></section>
@@ -70,13 +81,22 @@
 </main>
 
 <dialog class="modal" id="cardModal"><div class="mh"><div><div class="ey" id="role"></div><h2 id="cardName"></h2></div><button class="x" data-close="cardModal">×</button></div><div class="detail"><div id="bigImage"></div><div><div class="facts" id="facts"></div><div class="oracle" id="oracle"></div><div class="note"><div class="ey">MTGLINE NOTE</div><p id="note"></p></div><div class="dialogacts" id="cardActions"></div></div></div></dialog>
-<dialog class="modal small" id="importModal"><div class="mh"><div><div class="ey">DECK SOURCE</div><h2>Import a deck</h2></div><button class="x" data-close="importModal">×</button></div><p class="muted">Use a public Moxfield URL when available. If Moxfield blocks the request, paste its exported decklist instead. Card images and rules text come from Scryfall.</p><label class="label">Public Moxfield URL</label><div class="importrow"><input class="input" id="moxUrl" placeholder="https://moxfield.com/decks/..."><button class="btn primary" id="moxBtn">Import URL</button></div><div class="importmsg" id="importMsg"></div><label class="label">Paste decklist</label><textarea class="textarea" id="deckText" placeholder="1 Sol Ring&#10;1 Arcane Signet&#10;...&#10;&#10;COMMANDER:&#10;1 Glarb, Calamity's Augur"></textarea><button class="btn primary" style="margin-top:8px" id="pasteBtn">Use pasted decklist</button></dialog>
-<dialog class="modal small" id="routesModal"><div class="mh"><div><div class="ey">CORE COMBOS</div><h2>Win routes</h2></div><button class="x" data-close="routesModal">×</button></div><div id="routeLibrary"></div></dialog>
+<dialog class="modal small" id="importModal" aria-labelledby="importTitle">
+  <div class="mh"><div><div class="ey">DECK SOURCE</div><h2 id="importTitle">Import a deck</h2></div><button class="x" data-close="importModal" aria-label="Close import">×</button></div>
+  <p class="muted">Import a public Moxfield deck or paste an exported list. MTGLine reads the cards and analyzes the deck’s strategy.</p>
+  <label class="label" for="moxUrl">Public Moxfield URL</label><div class="importrow"><input class="input" type="url" id="moxUrl" placeholder="https://moxfield.com/decks/..."><button class="btn primary" id="moxBtn">Import URL</button></div>
+  <div class="importmsg" id="importMsg" role="status"></div>
+  <details class="paste-import" open><summary>Paste a decklist</summary>
+    <div class="import-grid"><div><label class="label" for="deckNameInput">Deck name (optional)</label><input class="input" id="deckNameInput" maxlength="160"></div><div><label class="label" for="deckFormat">Format</label><select class="input" id="deckFormat"><option value="commander">Commander</option><option value="constructed">Constructed / other</option></select></div></div>
+    <label class="label" for="commanderInput">Commander names (optional, one per line)</label><textarea class="textarea commander-input" id="commanderInput" placeholder="Or include a Commander section in the list"></textarea>
+    <label class="label" for="deckText">Decklist</label><textarea class="textarea" id="deckText" placeholder="1 Card Name&#10;4 Another Card&#10;&#10;Commander&#10;1 Commander Name"></textarea>
+    <button class="btn primary" style="margin-top:8px" id="pasteBtn">Import and analyze</button>
+  </details>
+</dialog>
+<dialog class="modal small" id="routesModal" aria-labelledby="analysisTitle"><div class="mh"><div><div class="ey">DECK PROFILE</div><h2 id="analysisTitle">Strategy and win routes</h2></div><button class="x" data-close="routesModal" aria-label="Close deck analysis">×</button></div><div id="routeLibrary"></div></dialog>
+<script src="/deck-core.js"></script>
+<script src="/hand-engine.js"></script>
 <script src="/app.js"></script>
-<script src="/mana-evaluator.js"></script>
-<script src="/enhancements.js"></script>
-<script src="/expert-evaluator.js"></script>
 <script src="/hover-preview.js"></script>
-<script src="/branding.js"></script>
 </body>
 </html>

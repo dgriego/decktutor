@@ -1,7 +1,11 @@
 function extractPublicId(input = '') {
   const raw = String(input).trim();
-  const match = raw.match(/moxfield\.com\/decks\/([A-Za-z0-9_-]+)/i);
-  if (match) return match[1];
+  try {
+    const url = new URL(raw);
+    if (['moxfield.com', 'www.moxfield.com'].includes(url.hostname) && url.protocol === 'https:') {
+      return url.pathname.match(/^\/decks\/([A-Za-z0-9_-]{8,80})\/?$/)?.[1] || null;
+    }
+  } catch {}
   if (/^[A-Za-z0-9_-]{8,}$/.test(raw)) return raw;
   return null;
 }
@@ -30,6 +34,7 @@ function normalizeDeck(data) {
     name: data.name || 'Imported Moxfield deck',
     commander: commanders[0]?.name || null,
     commanders,
+    format: data.format || (commanders.length ? 'commander' : 'constructed'),
     cards: main,
     publicId: data.publicId || data.public_id || null,
   };
@@ -48,7 +53,7 @@ module.exports = async function handler(req, res) {
   ];
   const headers = {
     'Accept': 'application/json,text/plain,*/*',
-    'User-Agent': 'Mozilla/5.0 (compatible; GlarbDeckTutor/1.0)',
+    'User-Agent': 'MTGLine/1.0 (https://mtgline.vercel.app)',
     'Referer': `https://www.moxfield.com/decks/${publicId}`,
     'Origin': 'https://www.moxfield.com',
   };
@@ -56,7 +61,7 @@ module.exports = async function handler(req, res) {
   let lastStatus = null;
   for (const url of endpoints) {
     try {
-      const response = await fetch(url, { headers, redirect: 'follow' });
+      const response = await fetch(url, { headers, redirect: 'error', signal: AbortSignal.timeout(8000) });
       lastStatus = response.status;
       if (!response.ok) continue;
       const text = await response.text();

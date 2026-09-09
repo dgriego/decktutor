@@ -1,0 +1,59 @@
+body { font-size: 16px; }
+button:disabled { opacity: .5; cursor: default; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--g); outline-offset: 3px; }
+.ey, .status, .zh, .stats, .library-stack small { font-size: 12px; }
+.top .status { max-width: 360px; overflow-wrap: anywhere; }
+.profile-card { border: 1px solid #365a42; border-left: 3px solid var(--g); background: #121d16; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
+.profile-card h2 { margin: 6px 0; font-size: 21px; }
+.profile-card p { margin: 8px 0; line-height: 1.5; }
+.profile-card .muted, .label, .importmsg, .modal .muted, .chip { font-size: 14px; }
+.deck-warning, .bottom-notice { color: var(--y); font-size: 14px; }
+.deck-warning:empty, .bottom-notice:empty, #saveStatus:empty { display: none; }
+.bottom-notice { padding: 0 16px 14px; }
+.practice-settings { display: flex; align-items: center; gap: 12px; margin: 12px 0; font-size: 14px; }
+.practice-settings select { width: auto; max-width: 100%; }
+.playmat { min-height: 520px; }
+.commander-list .card { width: 100%; display: block; }
+.commander-list .btn { width: 100%; margin: 8px 0 12px; font-size: 13px; }
+.commander-active { outline: 2px solid var(--g); border-radius: 8px; }
+.commander-list .card:hover { transform: none; }
+.empty { font-size: 14px; }
+.coach, .coach .muted, .coach .signal, .coach .btn, .coach .link, .coach .routehead, .context-oracle, .context-note, .context-item p { font-size: 14px; }
+.coach .ey { font-size: 12px; }
+.coach p, .route p, .route li { line-height: 1.55; }
+.coach .piece, .piece { font-size: 12px; }
+.routehead { flex-wrap: wrap; }
+.route .prog { font-size: 12px; white-space: nowrap; }
+.route ol, .route ul { padding-left: 22px; font-size: 14px; }
+.route li { margin-bottom: 6px; }
+.turn-step { border-bottom: 1px solid var(--l); padding: 14px 0; }
+.turn-step strong { color: var(--g); }
+.turn-step p { margin: 5px 0; }
+.factor-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin: 14px 0; }
+.factor-row meter { grid-column: 1 / -1; width: 100%; height: 8px; accent-color: var(--g); }
+.import-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.textarea { font-size: 14px; }
+.textarea.commander-input { min-height: 64px; }
+.paste-import { margin-top: 20px; border-top: 1px solid var(--l); padding-top: 16px; }
+summary { cursor: pointer; line-height: 1.5; }
+.deck-counts { display: flex; flex-wrap: wrap; gap: 8px; }
+.deck-counts span { background: var(--p2); padding: 8px 10px; border-radius: 6px; font-size: 14px; }
+.deck-counts b { color: var(--g); margin-left: 8px; }
+.hand-subtitle { font-size: 12px; }
+.context-item { margin: 8px 0; }
+.context-item strong { font-size: 15px; }
+@media (max-width: 930px) { .coach { position: static; height: auto; } }
+@media (max-width: 650px) {
+  .top { position: static; flex-direction: column; padding: 12px; }
+  .top .status { display: block; }
+  .top .acts { width: 100%; }
+  #metaStatus { width: 100%; }
+  .practice-settings { align-items: flex-start; flex-direction: column; }
+  .practice-settings select { width: 100%; }
+  .profile-card { padding: 14px; }
+  .import-grid { grid-template-columns: 1fr; }
+  .field-zone { min-height: 220px; }
+  .field-cards { min-height: 180px; }
+  .stats { gap: 8px; flex-wrap: wrap; }
+  .zh { font-size: 11px; }
+}

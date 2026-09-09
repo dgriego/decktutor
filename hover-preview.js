@@ -33,7 +33,10 @@
     preview.style.width=`${width}px`;
     preview.style.left=`${Math.round(left)}px`;
     preview.style.top=`${Math.round(top)}px`;
-    preview.innerHTML=`<img src="${source.src}" alt=""><div class="hover-card-label">${card.dataset.card||source.alt||''}</div>`;
+    preview.replaceChildren();
+    const enlarged = document.createElement('img'); enlarged.src = source.src; enlarged.alt = '';
+    const label = document.createElement('div'); label.className = 'hover-card-label'; label.textContent = card.dataset.card || source.alt || '';
+    preview.append(enlarged, label);
     requestAnimationFrame(()=>preview.classList.add('visible'));
   }
 

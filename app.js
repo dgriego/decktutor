@@ -1,10 +1,257 @@
-const BASE=`Aesi, Tyrant of Gyre Strait|Aetherflux Reservoir|Alchemist's Refuge|Ancient Cellarspawn|Arcane Signet|Awakening|Bilbo, Thief in the Night|Birds of Paradise|Bloom Tender|Bojuka Bog|Bolas's Citadel|Boseiju, Who Endures|Brainstorm|Breeding Pool|Cabal Coffers|Clever Impersonator|Command Tower|Counterbalance|Cruel Tutor|Culling Ritual|Deadly Rollick|Deathrite Shaman|Delighted Halfling|Dryad of the Ilysian Grove|Elven Chorus|Elves of Deep Shadow|Emergent Ultimatum|Exotic Orchard|Exploration|Fell the Profane|Field of the Dead|Force of Vigor|Forest|Fortune Teller's Talent|Gwenom, Remorseless|Hedge Maze|High Fae Trickster|Hullbreaker Horror|Insidious Dreams|Island|Kishla Village|Legolas's Quick Reflexes|Lightning Greaves|Loyal Inventor|Mana Confluence|Metamorphosis Fanatic|Mindbreak Trap|Mirri's Guile|Misty Rainforest|Mockingbird|Molt Tender|Morphic Pool|Mystic Sanctuary|Noxious Revival|One with the Multiverse|Oracle of Mul Daya|Otawara, Soaring City|Overgrown Tomb|Phyrexian Metamorph|Polluted Delta|Rejuvenating Springs|Savvy Trader|Scheming Symmetry|Scute Swarm|Sea Gate Restoration|Seedborn Muse|Sensei's Divining Top|Sheoldred, the Apocalypse|Shifting Woodland|Snuff Out|Sol Ring|Sowing Mycospawn|Submerge|Sylvan Library|Sylvan Tutor|Talion, the Kindly Lord|Temporal Mastery|The Gitrog Monster|The Reality Chip|Tidal Barracuda|Titans' Nest|Turbulent Fen|Turbulent Wilderness|Undercity Sewers|Underground Mortuary|Undergrowth Stadium|Urborg, Tomb of Yawgmoth|Urza's Saga|Valley Floodcaller|Verdant Catacombs|Vicious Rivalry|Volrath's Stronghold|Wan Shi Tong, Librarian|Waterlogged Grove|Waterlogged Teachings|Watery Grave|Whispering Madness|Wonder|Yavimaya, Cradle of Growth`.split('|');let deck=[...BASE],commander="Glarb, Calamity's Augur",deckName=commander,prints=new Map(),meta=new Map();const $=x=>document.getElementById(x),set=x=>new Set(x.split('|')),LAND=set("Alchemist's Refuge|Bojuka Bog|Boseiju, Who Endures|Breeding Pool|Cabal Coffers|Command Tower|Exotic Orchard|Field of the Dead|Forest|Hedge Maze|Island|Kishla Village|Mana Confluence|Misty Rainforest|Morphic Pool|Mystic Sanctuary|Otawara, Soaring City|Overgrown Tomb|Polluted Delta|Rejuvenating Springs|Shifting Woodland|Turbulent Fen|Turbulent Wilderness|Undercity Sewers|Underground Mortuary|Undergrowth Stadium|Urborg, Tomb of Yawgmoth|Urza's Saga|Verdant Catacombs|Volrath's Stronghold|Waterlogged Grove|Watery Grave|Yavimaya, Cradle of Growth|Fell the Profane|Sea Gate Restoration|Waterlogged Teachings"),RAMP=set("Arcane Signet|Birds of Paradise|Bloom Tender|Deathrite Shaman|Delighted Halfling|Dryad of the Ilysian Grove|Elves of Deep Shadow|Exploration|Molt Tender|Sol Ring"),TUTOR=set("Cruel Tutor|Emergent Ultimatum|Insidious Dreams|Loyal Inventor|Scheming Symmetry|Sylvan Tutor|Waterlogged Teachings"),INT=set("Boseiju, Who Endures|Counterbalance|Culling Ritual|Deadly Rollick|Fell the Profane|Force of Vigor|Legolas's Quick Reflexes|Mindbreak Trap|Noxious Revival|Otawara, Soaring City|Snuff Out|Submerge|Vicious Rivalry|Waterlogged Teachings"),ENG=set("Brainstorm|Fortune Teller's Talent|Mirri's Guile|Sensei's Divining Top|Sylvan Library|Seedborn Muse|Talion, the Kindly Lord|The Reality Chip"),COMBO=set("Aetherflux Reservoir|Bolas's Citadel|Sensei's Divining Top|Sheoldred, the Apocalypse|Hullbreaker Horror|Sol Ring|Arcane Signet|Insidious Dreams|Loyal Inventor");const NOTES={"Aetherflux Reservoir":"Primary payoff. Repeated casts gain huge life, then Reservoir converts that life into 50-damage shots.","Bolas's Citadel":"Primary engine. Cast from the top by paying life instead of mana. Pair with Top and Reservoir or Top and Sheoldred.","Sensei's Divining Top":"Top-deck setup and a combo piece. With Citadel, Top can draw itself and be recast from the top repeatedly.","Hullbreaker Horror":"With Sol Ring + Arcane Signet, it creates a repeatable casting loop once another spell starts the chain.","Insidious Dreams":"Discard X cards to stack X cards on top. With Glarb, 4+ mana-value cards can then be cast directly from the top.","Loyal Inventor":"Can bridge into Citadel or Reservoir by putting an artifact on top for Glarb to cast.","Sylvan Tutor":"Find the creature that solves the current problem. Seedborn Muse, Sheoldred, Hullbreaker, or Loyal Inventor are common routes.","Waterlogged Teachings":"Find an instant or flash card, including Insidious Dreams, Hullbreaker Horror, or interaction.","Deadly Rollick":"Clean creature exile, often free while Glarb is on the battlefield.","Snuff Out":"Efficient creature removal for nonblack creatures, often paid for with life.","Clever Impersonator":"Copy the best nonland permanent on the table. Copying does not target.","Seedborn Muse":"Untap every turn cycle for repeated Glarb surveils and more mana."};const ROUTES=[['Citadel + Top + Reservoir',["Bolas's Citadel","Sensei's Divining Top","Aetherflux Reservoir"],'Top draws itself, Citadel recasts it for 1 life, Reservoir gains escalating life. Pay 50 per opponent.'],['Hullbreaker rock loop + Reservoir',["Hullbreaker Horror","Sol Ring","Arcane Signet","Aetherflux Reservoir"],'Bounce and recast Sol Ring/Signet with Hullbreaker. Reservoir turns repeated casts into lethal life.'],['Citadel + Top + Sheoldred',["Bolas's Citadel","Sensei's Divining Top","Sheoldred, the Apocalypse"],'Each Top draw gains 2 while Citadel costs 1 life. Dig until Reservoir appears.'],['Insidious Dreams setup',["Insidious Dreams",commander],'Stack Reservoir, Citadel, and Top so Glarb/Citadel can assemble the primary win.']];let st={lib:[],hand:[],field:[],grave:[],cmd:false,m:0,reveal:false,choice:''};
-const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),shuffle=a=>{a=[...a];for(let i=a.length-1;i;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};function role(n){return COMBO.has(n)?'combo':LAND.has(n)?'land':TUTOR.has(n)?'tutor':INT.has(n)?'interaction':RAMP.has(n)?'ramp':ENG.has(n)?'engine':'utility'}function label(r){return{combo:'combo',land:'land',tutor:'tutor',interaction:'interaction',ramp:'ramp',engine:'engine',utility:'utility'}[r]}function hint(n){return NOTES[n]|| (TUTOR.has(n)?'Tutor for the missing piece in your current route.':INT.has(n)?'Protect your plan or stop an opponent.':RAMP.has(n)?'Accelerate Glarb or your engine.':LAND.has(n)?'Mana source.':'Flexible value or utility card.')}
-function compact(c,name){let faces=(c.card_faces||[]).map(f=>({name:f.name,mana:f.mana_cost||'',type:f.type_line||'',text:f.oracle_text||'',image:f.image_uris?.normal||null}));return{name,canonical:c.name,mana:c.mana_cost||'',type:c.type_line||'',text:c.oracle_text||'',set:c.set||'',setName:c.set_name||'',cn:c.collector_number||'',image:c.image_uris?.normal||faces[0]?.image||null,faces,key:`${c.set||''}:${c.collector_number||''}`}}function matchCard(c,names){let byPrint=names.find(n=>{let p=prints.get(n);return p&&String(p.set).toLowerCase()===c.set&&String(p.cn)===String(c.collector_number)});if(byPrint)return byPrint;return names.find(n=>c.name===n||c.name.startsWith(n+' //'))||c.name}async function hydrate(force=false){let names=[...new Set([...deck,commander])],need=force?names:names.filter(n=>!meta.has(n));if(!need.length){$('metaStatus').textContent='Card data ready';$('metaStatus').className='status ok';render();return}$('metaStatus').textContent=`Loading card data…`;try{for(let i=0;i<need.length;i+=75){let batch=need.slice(i,i+75),ids=batch.map(n=>{let p=prints.get(n);return p?.set&&p?.cn?{set:String(p.set).toLowerCase(),collector_number:String(p.cn)}:{name:n}}),r=await fetch('https://api.scryfall.com/cards/collection',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifiers:ids})});if(!r.ok)throw Error('Scryfall '+r.status);let d=await r.json();(d.data||[]).forEach(c=>{let n=matchCard(c,batch);meta.set(n,compact(c,n))});let nf=(d.not_found||[]).map(x=>x.name).filter(Boolean);if(nf.length){let rr=await fetch('https://api.scryfall.com/cards/collection',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifiers:nf.map(name=>({name}))})});if(rr.ok){let dd=await rr.json();(dd.data||[]).forEach(c=>{let n=matchCard(c,nf);meta.set(n,compact(c,n))})}}}$('metaStatus').textContent=`Card data ready · ${meta.size}`;$('metaStatus').className='status ok';render()}catch(e){console.error(e);$('metaStatus').textContent='Card data unavailable';$('metaStatus').className='status';render()}}
-function fresh(reset=true){if(reset)st.m=0;st.lib=shuffle(deck);st.hand=st.lib.splice(0,7);st.field=[];st.grave=[];st.cmd=false;st.reveal=false;st.choice='';render()}function cardEl(n,z){let m=meta.get(n),b=document.createElement('button'),r=role(n);b.className=`card ${r}`;b.innerHTML=m?.image?`<img src="${esc(m.image)}" alt="${esc(n)} card" loading="lazy"><span class="badge">${label(r)}</span>`:`<div class="fallback"><b>${esc(n)}</b><span class="muted">${esc(hint(n))}</span></div><span class="badge">${label(r)}</span>`;b.onclick=()=>openCard(n,z);return b}function zone(id,a,z){let root=$(id);root.innerHTML='';if(!a.length){root.innerHTML='<div class="empty">No cards here yet.</div>';return}a.forEach(n=>root.append(cardEl(n,z)))}function available(){return new Set([...st.hand,...st.field,...(st.cmd?[commander]:[])])}
-function analyze(){let h=st.hand,l=h.filter(x=>LAND.has(x)),r=h.filter(x=>RAMP.has(x)),t=h.filter(x=>TUTOR.has(x)),i=h.filter(x=>INT.has(x)),e=h.filter(x=>ENG.has(x)),c=h.filter(x=>COMBO.has(x)),s=48,sg=[];if(l.length>=2&&l.length<=3){s+=20;sg.push(['✓',`${l.length} usable mana sources: ideal development.`])}else if(l.length<2){s-=l.length?24:40;sg.push(['!',`${l.length} mana sources: too fragile.`])}else if(l.length>=5){s-=15;sg.push(['!','Too many lands; not enough action.'])}else{s+=7;sg.push(['✓','Playable mana count.'])}if(h.includes('Sol Ring')){s+=13;sg.push(['✓','Sol Ring makes the hand much faster.'])}else if(r.length){s+=Math.min(15,r.length*8);sg.push(['✓',`Acceleration: ${r.slice(0,2).join(', ')}.`])}if(t.length){s+=Math.min(16,t.length*9);sg.push(['✓',`Tutor access: ${t.slice(0,2).join(', ')}.`])}if(e.length){s+=Math.min(12,e.length*6);sg.push(['✓',`Top/value setup: ${e.slice(0,2).join(', ')}.`])}if(i.length){s+=Math.min(10,i.length*5);sg.push(['✓',`Interaction: ${i.slice(0,2).join(', ')}.`])}else{s-=4;sg.push(['!','No obvious interaction.'])}if(c.length>=2){s+=6;sg.push(['✓',`${c.length} cards already belong to core win engines.`])}s=Math.max(8,Math.min(96,s));let v=s>=80?'Strong keep':s>=66?'Keep':s>=52?'Contextual keep':s>=38?'Lean mulligan':'Mulligan';return{s,v,sg,l,r,t,i,e,c}}
-function renderCoach(){if(!st.reveal){$('analysis').classList.add('hidden');$('quiz').classList.remove('hidden');return}let a=analyze(),av=available();$('analysis').classList.remove('hidden');$('quiz').classList.add('hidden');$('score').textContent=a.s;$('verdict').textContent=a.v;$('summary').textContent=(st.choice?`You chose ${st.choice.toUpperCase()}. `:'')+(a.s>=66?'This hand has a coherent development plan. Develop mana, establish Glarb or another engine, then tutor toward a real finish.':'This hand is missing one or more fundamentals. Powerful cards are not enough if the first two turns are clumsy.');$('signals').innerHTML=a.sg.slice(0,6).map(x=>`<div class="signal">${x[0]} ${esc(x[1])}</div>`).join('');let rs=ROUTES.map(([n,p,d])=>{let have=p.filter(x=>av.has(x));return{n,p,d,have,miss:p.filter(x=>!av.has(x))}}).sort((a,b)=>b.have.length/b.p.length-a.have.length/a.p.length).slice(0,3);$('routes').innerHTML=rs.map(r=>`<div class="route"><div class="routehead"><span>${esc(r.n)}</span><span class="prog">${r.have.length}/${r.p.length}</span></div><div class="pieces">${r.p.map(x=>`<span class="piece ${r.have.includes(x)?'have':''}">${esc(x===commander?'Glarb':x)}</span>`).join('')}</div><p class="muted">${r.miss.length?'Missing: '+esc(r.miss.join(' + ')):esc(r.d)}</p></div>`).join('');let n;if(av.has("Bolas's Citadel")&&av.has("Sensei's Divining Top")&&!av.has('Aetherflux Reservoir'))n='Aetherflux Reservoir. Citadel + Top is already forming.';else if(av.has('Hullbreaker Horror')&&av.has('Sol Ring')&&av.has('Arcane Signet')&&!av.has('Aetherflux Reservoir'))n='Aetherflux Reservoir. Your Hullbreaker rock loop is assembled.';else if(a.l.length<2)n='A reliable colored mana source.';else if(!a.r.length)n='Cheap acceleration or a strong top-deck engine.';else if(!a.t.length)n='A tutor or missing Citadel/Top/Reservoir piece.';else if(!a.i.length)n='Protection or removal before you commit.';else n='The missing piece from your highest-progress route.';$('next').textContent=n}
-function render(){document.title=`MTGLine · ${deckName}`;$('title').textContent='MTGLine';if($('deckContext'))$('deckContext').textContent=deckName;$('lib').textContent=st.lib.length;$('mulls').textContent=st.m;$('gameStatus').textContent=st.field.length||st.cmd?'Live board coaching':'Opening hand practice';zone('hand',st.hand,'hand');zone('field',st.field,'field');let cm=meta.get(commander),root=$('cmdCard');if(cm?.image){root.className='';root.innerHTML=`<img src="${esc(cm.image)}" alt="${esc(commander)} card">`;root.querySelector('img').onclick=()=>openCard(commander,'cmd')}else{root.className='placeholder';root.textContent=commander}root.style.outline=st.cmd?'2px solid var(--g)':'none';$('cmdBtn').textContent=st.cmd?'Return to command zone':'Move to battlefield';renderCoach()}
-function oracle(m){if(!m)return'Card rules text is still loading.';if(m.faces?.length)return m.faces.map(f=>`${f.name} ${f.mana}\n${f.type}\n${f.text}`).join('\n\n— — —\n\n');return m.text||'No Oracle text.'}function openCard(n,z){let m=meta.get(n);$('cardName').textContent=n;$('role').textContent=label(role(n));$('bigImage').innerHTML=m?.image?`<img src="${esc(m.image)}" alt="${esc(n)} card">`:'<div class="placeholder">Card image loading…</div>';$('facts').innerHTML=[m?.mana,m?.type,m?.setName?`${m.setName} · ${String(m.set).toUpperCase()} ${m.cn}`:null].filter(Boolean).map(x=>`<span class="chip">${esc(x)}</span>`).join('');$('oracle').textContent=oracle(m);$('note').textContent=hint(n);let a=$('cardActions');a.innerHTML='';if(z==='hand'){a.append(action('Play / cast',()=>move(n,'hand','field')));a.append(action('Discard',()=>move(n,'hand','grave')))}else if(z==='field'){a.append(action('Return to hand',()=>move(n,'field','hand')));a.append(action('To graveyard',()=>move(n,'field','grave')))}$('cardModal').showModal()}function action(txt,fn){let b=document.createElement('button');b.className='btn';b.textContent=txt;b.onclick=()=>{fn();$('cardModal').close()};return b}function move(n,from,to){let a=st[from],i=a.indexOf(n);if(i<0)return;let [c]=a.splice(i,1);st[to].push(c);st.reveal=true;render()}
-function parseList(text){let sec='main',cards=[],cmd=null;for(let raw of text.split(/\r?\n/)){let line=raw.trim();if(!line)continue;if(/^(commander|commanders):?$/i.test(line)){sec='cmd';continue}if(/^(sideboard|maybeboard|considering):?$/i.test(line)){sec='skip';continue}if(/^(mainboard|deck):?$/i.test(line)){sec='main';continue}if(sec==='skip')continue;let m=line.match(/^(\d+)\s+(.+?)(?:\s+\(([A-Za-z0-9]+)\)\s+([^\s]+))?(?:\s+\*[^*]+\*)?$/);if(!m)continue;let o={quantity:+m[1],name:m[2].trim(),set:m[3]||null,cn:m[4]||null};if(sec==='cmd')cmd=o.name;else cards.push(o)}if(!cmd){let i=cards.findIndex(c=>c.name==="Glarb, Calamity's Augur");if(i>=0)cmd=cards.splice(i,1)[0].name}return{name:cmd?`${cmd} Trainer`:'Imported deck',commander:cmd,cards}}function applyDeck(d){if(!d.cards?.length)throw Error('No main-deck cards found.');commander=d.commander||commander;deckName=d.name||commander;prints=new Map;deck=[];d.cards.forEach(c=>{if(c.set&&c.cn)prints.set(c.name,{set:c.set,cn:c.cn});if(c.set&&c.collector_number)prints.set(c.name,{set:c.set,cn:c.collector_number});for(let i=0;i<+(c.quantity||1);i++)deck.push(c.name)});if(deck.length>99){let i=deck.indexOf(commander);if(i>=0)deck.splice(i,1)}fresh(true);hydrate(true)}async function importMox(){let u=$('moxUrl').value.trim(),msg=$('importMsg');if(!u)return;msg.className='importmsg';msg.textContent='Importing…';try{let r=await fetch(`/api/moxfield?url=${encodeURIComponent(u)}`),d=await r.json();if(!r.ok)throw Error(d.error||'Import failed');applyDeck(d);msg.className='importmsg ok';msg.textContent=`Imported ${d.name||'deck'}.`;$('importModal').close()}catch(e){msg.className='importmsg err';msg.textContent=`${e.message}. Paste the exported decklist below instead.`}}function routeLibrary(){$('routeLibrary').innerHTML=ROUTES.map(([n,p,d])=>`<div class="route"><div class="routehead"><span>${esc(n)}</span><span class="prog">${p.length} pieces</span></div><p class="muted">${esc(d)}</p><div class="pieces">${p.map(x=>`<span class="piece">${esc(x===commander?'Glarb':x)}</span>`).join('')}</div></div>`).join('')}
-$('newBtn').onclick=()=>fresh(true);$('drawBtn').onclick=()=>{if(st.lib.length)st.hand.push(st.lib.shift());st.reveal=true;render()};$('mullBtn').onclick=()=>{st.m++;fresh(false)};$('cmdBtn').onclick=()=>{st.cmd=!st.cmd;st.reveal=true;render()};$('reveal').onclick=()=>{st.reveal=true;render()};document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{st.choice=b.dataset.d;st.reveal=true;render()});document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());$('importBtn').onclick=()=>$('importModal').showModal();$('moxBtn').onclick=importMox;$('pasteBtn').onclick=()=>{let msg=$('importMsg');try{applyDeck(parseList($('deckText').value));msg.className='importmsg ok';msg.textContent='Deck imported.';$('importModal').close()}catch(e){msg.className='importmsg err';msg.textContent=e.message}};$('routesBtn').onclick=()=>{routeLibrary();$('routesModal').showModal()};fresh(true);hydrate(false);
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const STORAGE = 'mtgline.active.v1';
+let loaded = null, generation = 0, aiController = null, importing = false, analyzing = false, contextTimer, evaluationCache;
+let st = { lib: [], hand: [], field: [], grave: [], commanders: [], casts: {}, m: 0, reveal: false, choice: '', bottom: 0 };
+const multiplayer = () => $('gameMode').value === 'multiplayer';
+const metadata = name => loaded?.metadata[name];
+const cardProfile = name => loaded?.profile.cards.find(c => c.name === name);
+const role = name => {
+  const roles = cardProfile(name)?.roles || [];
+  return DeckCore.isLand(metadata(name)) ? 'land' : ['tutor', 'interaction', 'ramp', 'engine', 'payoff', 'draw'].find(r => roles.includes(r)) || 'utility';
+};
+const hint = name => cardProfile(name)?.note || `Roles: ${(cardProfile(name)?.roles || ['utility']).join(', ')}. Read the Oracle text for costs and conditions.`;
+function shuffle(cards) {
+  const copy = [...cards];
+  for (let i = copy.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [copy[i], copy[j]] = [copy[j], copy[i]]; }
+  return copy;
+}
+function save() {
+  try { localStorage.setItem(STORAGE, JSON.stringify({ ...loaded, savedAt: Date.now() })); }
+  catch { $('saveStatus').textContent = 'This browser could not save the deck. It remains available for this session.'; }
+}
+function fresh(reset = true) {
+  if (!loaded) return;
+  const m = reset ? 0 : st.m;
+  st = { lib: shuffle(loaded.deck.cards.flatMap(c => Array(c.quantity).fill(c.name))), hand: [], field: [], grave: [], commanders: [], casts: {}, m, reveal: false, choice: '', bottom: 0 };
+  st.hand = st.lib.splice(0, 7);
+  clearContext(); render();
+}
+function currentAnalysis() {
+  if (!loaded) return null;
+  const key = JSON.stringify([st, loaded.profile, $('gameMode').value]);
+  if (evaluationCache?.key === key) return evaluationCache.value;
+  const value = HandEngine.evaluate(st.hand, loaded.deck, loaded.metadata, loaded.profile, {
+    library: st.lib, field: st.field, commandersInPlay: st.commanders, commanderTax: st.casts,
+    mulligans: st.m, multiplayer: multiplayer(), onDraw: $('gameMode').value === 'draw'
+  });
+  evaluationCache = { key, value };
+  return value;
+}
+function action(text, fn) {
+  const button = document.createElement('button'); button.className = 'btn'; button.textContent = text;
+  button.onclick = () => { fn(); $('cardModal').close(); }; return button;
+}
+function cardEl(name, zoneName, index) {
+  const c = metadata(name), button = document.createElement('button');
+  button.className = `card ${role(name)}`; button.dataset.card = name; button.dataset.zone = zoneName; button.dataset.index = index;
+  button.setAttribute('aria-label', `${name}, ${zoneName}. Inspect card`);
+  button.innerHTML = c?.image ? `<img src="${esc(c.image)}" alt="${esc(name)}" loading="lazy"><span class="badge">${esc(role(name))}</span>` : `<div class="fallback"><b>${esc(name)}</b><span>${c ? esc(role(name)) : 'Card data missing'}</span></div>`;
+  button.onclick = () => openCard(name, zoneName, index);
+  button.onmouseenter = button.onfocus = () => showCardContext(name);
+  button.onmouseleave = button.onblur = () => { contextTimer = setTimeout(clearContext, 200); };
+  if (zoneName !== 'cmd') {
+    button.draggable = true;
+    button.ondragstart = e => { e.dataTransfer.setData('text/plain', JSON.stringify({ zone: zoneName, index, name })); e.dataTransfer.effectAllowed = 'move'; button.classList.add('dragging'); };
+    button.ondragend = () => button.classList.remove('dragging');
+  }
+  return button;
+}
+function zone(id, cards, zoneName) {
+  const root = $(id); root.replaceChildren();
+  if (!cards.length) { const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = loaded ? 'No cards here yet.' : 'Import a deck to begin.'; root.append(empty); }
+  cards.forEach((name, index) => root.append(cardEl(name, zoneName, index)));
+}
+function move(index, from, to, name) {
+  if (!['hand', 'field', 'grave'].includes(from) || !['hand', 'field', 'grave'].includes(to) || from === to || st.bottom) return;
+  if (!Number.isInteger(index) || index < 0 || index >= st[from].length || name && st[from][index] !== name) return;
+  st[to].push(st[from].splice(index, 1)[0]); st.reveal = true; clearContext(); render();
+}
+function bottomCard(index) {
+  if (!st.bottom || index < 0 || index >= st.hand.length) return;
+  st.lib.push(st.hand.splice(index, 1)[0]); st.bottom--; clearContext(); render();
+}
+function toggleCommander(name) {
+  if (st.bottom) return;
+  if (st.commanders.includes(name)) st.commanders = st.commanders.filter(n => n !== name);
+  else { st.commanders.push(name); st.casts[name] = (st.casts[name] || 0) + 1; }
+  st.reveal = true; render();
+}
+function openCard(name, zoneName, index) {
+  const c = metadata(name); $('cardName').textContent = name; $('role').textContent = (cardProfile(name)?.roles || []).join(' · ');
+  $('bigImage').innerHTML = c?.image ? `<img src="${esc(c.image)}" alt="${esc(name)}">` : '<div class="placeholder">Card data missing</div>';
+  $('facts').innerHTML = [c?.mana, c?.type, c?.setName ? `${c.setName} · ${c.set.toUpperCase()} ${c.cn}` : null].filter(Boolean).map(f => `<span class="chip">${esc(f)}</span>`).join('');
+  $('oracle').textContent = c?.faces?.length ? c.faces.map(f => `${f.name} ${f.mana}\n${f.type}\n${f.text}`).join('\n\n') : c?.text || 'Card data could not be resolved.';
+  $('note').textContent = hint(name);
+  const actions = $('cardActions'); actions.replaceChildren();
+  if (zoneName === 'hand' && st.bottom) actions.append(action('Put on bottom', () => bottomCard(index)));
+  else if (zoneName === 'hand') actions.append(action('Play / cast', () => move(index, 'hand', 'field', name)), action('Discard', () => move(index, 'hand', 'grave', name)));
+  else if (zoneName === 'field') actions.append(action('Return to hand', () => move(index, 'field', 'hand', name)), action('To graveyard', () => move(index, 'field', 'grave', name)));
+  else if (zoneName === 'grave') actions.append(action('Return to hand', () => move(index, 'grave', 'hand', name)), action('Move to battlefield', () => move(index, 'grave', 'field', name)));
+  else if (zoneName === 'cmd') actions.append(action(st.commanders.includes(name) ? 'Return to command zone' : 'Move to battlefield', () => toggleCommander(name)));
+  $('cardModal').showModal();
+}
+function clearContext() { clearTimeout(contextTimer); $('contextCoach').classList.add('hidden'); $('defaultCoach').classList.remove('hidden'); }
+function showCardContext(name) {
+  if (!loaded) return;
+  clearTimeout(contextTimer); $('contextCoach').classList.remove('hidden'); $('defaultCoach').classList.add('hidden');
+  $('contextName').textContent = name; $('contextRole').textContent = role(name);
+  $('contextFacts').textContent = [metadata(name)?.mana, metadata(name)?.type].filter(Boolean).join(' · ');
+  $('contextOracle').textContent = DeckCore.text(metadata(name)); $('contextNote').textContent = hint(name);
+  const active = new Set([...st.hand, ...st.field, ...st.commanders]);
+  const synergies = loaded.profile.synergies.filter(s => s.cards.includes(name));
+  $('contextSections').innerHTML = synergies.length ? synergies.map(s => `<section class="context-item ${s.cards.every(n => active.has(n)) ? 'hot' : ''}"><strong>${s.cards.filter(n => n !== name).map(esc).join(' + ')}</strong><p>${esc(s.explanation)}</p><p>${s.cards.every(n => active.has(n)) ? 'Cards available in hand / battlefield' : 'Missing: ' + s.cards.filter(n => !active.has(n)).map(esc).join(', ')}</p></section>`).join('') : '<p class="muted">No specific synergy was identified in this deck profile.</p>';
+}
+function renderProfileStatus() {
+  if (!loaded) { $('metaStatus').textContent = 'No deck loaded'; $('profileCard').classList.add('hidden'); return; }
+  const { facts, ai, profile } = loaded;
+  $('profileCard').classList.remove('hidden');
+  $('profileName').textContent = profile.archetype; $('profileSummary').textContent = profile.summary;
+  $('profileFacts').textContent = `${facts.total} library cards · ${facts.lands} land options · ${facts.averageMV} average spell value`;
+  $('metaStatus').textContent = importing ? 'Importing deck…' : analyzing ? 'Analyzing strategy…' : facts.missing.length ? `${facts.missing.length} unresolved cards` : ai.status === 'ready' ? 'AI profile ready' : 'Card data ready';
+  $('profileState').textContent = analyzing ? 'AI is reading this deck’s strategy and interactions…' : ai.status === 'ready' ? `AI analysis · ${new Date(ai.analyzedAt).toLocaleDateString()}` : ai.message;
+  $('retryAnalysis').classList.toggle('hidden', ai.status === 'ready' || !!facts.missing.length);
+  $('retryAnalysis').disabled = analyzing || importing;
+  $('deckWarnings').textContent = [facts.missing.length ? `Unresolved cards: ${facts.missing.join(', ')}.` : '', facts.expectedTotal !== null && facts.total !== facts.expectedTotal ? `This ${loaded.deck.format} list has ${facts.total + loaded.deck.commanders.length} total cards; expected 100. Coaching uses the cards actually imported.` : ''].filter(Boolean).join(' ');
+}
+function routesHtml(routes) {
+  if (!routes.length) return '<p class="muted">No candidate win routes are available for this profile.</p>';
+  return routes.map(r => `<article class="route"><div class="routehead"><strong>${esc(r.name)}</strong><span class="prog">${esc(r.confidence)} confidence</span></div><p class="muted">AI candidate route. Card availability does not verify execution.</p><div class="pieces">${r.cards.map(n => `<span class="piece ${r.have?.includes(n) ? 'have' : ''}">${esc(n)}${r.commandZone?.includes(n) ? ' (command zone)' : ''}</span>`).join('')}</div>${r.steps?.length ? `<ol>${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>` : ''}${r.conditions?.length ? `<p><b>Requires:</b> ${r.conditions.map(esc).join(' ')}</p>` : ''}</article>`).join('');
+}
+function renderCoach() {
+  const ready = !!loaded && !loaded.facts.missing.length;
+  $('quiz').classList.toggle('hidden', st.reveal && ready || !loaded);
+  $('analysis').classList.toggle('hidden', !st.reveal || !ready);
+  $('emptyCoach').classList.toggle('hidden', !!loaded);
+  $('reveal').disabled = !ready;
+  document.querySelectorAll('[data-d]').forEach(b => b.disabled = !ready || !!st.bottom);
+  if (!st.reveal || !ready) return;
+  const a = currentAnalysis();
+  $('score').textContent = a.score; $('verdict').textContent = a.verdict;
+  $('summary').textContent = `${st.choice ? `You chose ${st.choice}. ` : ''}${st.field.length || st.commanders.length ? 'Projection from the current board, assuming mana sources untap. ' : ''}${loaded.profile.priorities[0] || 'Develop usable mana and castable action'}. The score is a coaching estimate, not a win probability.`;
+  $('turnPlan').innerHTML = a.sim.plan.map(t => `<div class="turn-step"><strong>Turn ${t.turn}</strong><p>${t.land ? `Play ${esc(t.land.name)}${t.land.target ? `, fetching ${esc(t.land.target)}` : ''}${t.land.tapped ? ' tapped' : ''}. ` : 'No known land play. '}${t.spells.length ? t.spells.map(esc).join(' → ') + '.' : 'No development spell in this line.'}${t.held.length ? `<br>Can hold up ${t.held.map(esc).join(' or ')}.` : ''}</p></div>`).join('') + '<p class="muted">One searched line using only known cards. No future draws are assumed; spells still need legal targets and timing.</p>';
+  const labels = { mana: 'Mana and colors', sequencing: 'Early sequencing', castability: 'Castability', cardFlow: 'Card flow and tutors', interaction: 'Interaction', synergy: 'Deck synergy', resilience: 'Resilience' };
+  $('scorecard').innerHTML = Object.entries(a.scores).map(([key, value]) => `<div class="factor-row"><span>${labels[key]}</span><strong>${value ?? 'Unanalyzed'}</strong>${value !== null ? `<meter min="0" max="100" value="${value}" aria-label="${labels[key]}">${value}</meter>` : ''}</div>`).join('');
+  $('signals').innerHTML = a.reasons.map(r => `<div class="signal">${esc(r)}</div>`).join('') + Object.entries(a.sim.commandTurns).map(([name, turn]) => `<div class="signal">${esc(name)} can be paid for by turn ${turn} in a searched line.</div>`).join('');
+  $('riskOdds').innerHTML = `<p>${a.odds.landOuts} land options among ${a.odds.population} remaining cards.</p><p><b>${Math.round(a.odds.nextLand * 100)}%</b> chance the next draw is a land option.</p><p><b>${Math.round(a.odds.thirdLand * 100)}%</b> chance to have drawn enough land options for three total by turn 3 (${a.odds.draws} draws).</p><p>Variance: ${esc(a.variance)}. Draw odds count land options, including modal lands; they do not guarantee usable colors.</p><details><summary>Projection assumptions</summary><ul>${a.warnings.map(w => `<li>${esc(w)}</li>`).join('')}</ul></details>`;
+  $('routes').innerHTML = routesHtml(a.routes.slice(0, 2)); $('next').textContent = a.next;
+}
+function render() {
+  document.title = loaded ? `MTGLine · ${loaded.deck.name}` : 'MTGLine';
+  $('deckContext').textContent = loaded?.deck.name || 'Import a deck to begin';
+  for (const id of ['lib', 'libLarge']) $(id).textContent = st.lib.length;
+  for (const id of ['graveCount', 'graveRailCount']) $(id).textContent = st.grave.length;
+  $('mulls').textContent = st.m;
+  $('gameStatus').textContent = st.bottom ? `Choose ${st.bottom} card${st.bottom > 1 ? 's' : ''} to put on the bottom` : st.field.length || st.commanders.length ? 'Live playtest' : 'Opening hand practice';
+  $('bottomNotice').textContent = st.bottom ? `London mulligan: choose ${st.bottom} card${st.bottom > 1 ? 's' : ''} to put on the bottom. Click a card to choose it.` : '';
+  $('keepHandBtn').classList.toggle('hidden', !loaded || !st.m || st.choice === 'keep');
+  for (const id of ['newBtn', 'mullBtn', 'drawBtn', 'routesBtn']) $(id).disabled = !loaded || importing || (id === 'drawBtn' && (!st.lib.length || !!st.bottom));
+  $('gameMode').disabled = !!st.m || st.field.length > 0;
+  zone('hand', st.hand, 'hand'); zone('field', st.field, 'field'); zone('grave', st.grave, 'grave');
+  const root = $('cmdCard'); root.replaceChildren();
+  if (!loaded?.deck.commanders.length) { root.className = 'empty'; root.textContent = 'No commander'; }
+  else {
+    root.className = 'commander-list';
+    for (const [i, cmd] of loaded.deck.commanders.entries()) {
+      const wrap = document.createElement('div'); wrap.className = st.commanders.includes(cmd.name) ? 'commander-active' : '';
+      wrap.append(cardEl(cmd.name, 'cmd', i));
+      const toggle = action(st.commanders.includes(cmd.name) ? 'Return to command zone' : 'Move to battlefield', () => toggleCommander(cmd.name));
+      toggle.disabled = !!st.bottom; wrap.append(toggle); root.append(wrap);
+    }
+  }
+  renderProfileStatus(); renderCoach();
+}
+
+async function requestDeck(deck, analyze, signal) {
+  const response = await fetch('/api/analyze-deck', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deck, analyze }), signal });
+  const result = await response.json().catch(() => ({ error: 'The analysis server could not be reached. Try again.' }));
+  if (!response.ok) throw Error(result.error || 'Deck analysis failed.');
+  return result;
+}
+async function runAI(id = generation) {
+  if (!loaded || loaded.facts.missing.length || analyzing) return;
+  const input = loaded.deck, fingerprint = loaded.fingerprint;
+  aiController = new AbortController(); analyzing = true; renderProfileStatus();
+  try {
+    const result = await requestDeck(input, true, AbortSignal.any([aiController.signal, AbortSignal.timeout(145000)]));
+    if (id !== generation || loaded.fingerprint !== fingerprint) return;
+    loaded = result; save();
+  } catch (e) {
+    if (id !== generation) return;
+    loaded.ai = { status: 'unavailable', message: e.name === 'TimeoutError' ? 'AI analysis took too long. Retry when ready.' : 'AI analysis could not finish. Retry when ready.' };
+  } finally { if (id === generation) { analyzing = false; renderProfileStatus(); renderCoach(); } }
+}
+async function importDeck(input) {
+  const id = ++generation; aiController?.abort(); analyzing = false; importing = true; setImportBusy(true);
+  try {
+    const result = await requestDeck(input, false, AbortSignal.timeout(65000));
+    if (id !== generation) return;
+    loaded = result; $('gameMode').value = /commander|edh/.test(result.deck.format) ? 'multiplayer' : 'play';
+    $('saveStatus').textContent = 'Imported deck saved in this browser.'; save(); fresh();
+    $('importModal').close();
+  } finally { if (id === generation) { importing = false; setImportBusy(false); render(); } }
+  if (id === generation && loaded?.ai.status === 'pending') void runAI(id);
+}
+function setImportBusy(busy) {
+  for (const id of ['moxBtn', 'pasteBtn']) $(id).disabled = busy;
+  $('importMsg').textContent = busy ? 'Resolving card names, printings, and rules text…' : '';
+  $('importMsg').className = 'importmsg';
+}
+function importError(e) { $('importMsg').textContent = e.message; $('importMsg').className = 'importmsg err'; }
+$('moxBtn').onclick = async () => {
+  const url = $('moxUrl').value.trim(); if (!url) return;
+  setImportBusy(true);
+  try {
+    const response = await fetch(`/api/moxfield?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(28000) });
+    const data = await response.json();
+    if (!response.ok) throw Error(`${data.error || 'Moxfield import failed'}. Paste the exported decklist below.`);
+    await importDeck(data);
+  } catch (e) { setImportBusy(false); importError(e); }
+};
+$('pasteBtn').onclick = async () => {
+  try {
+    const options = { format: $('deckFormat').value };
+    if ($('deckNameInput').value.trim()) options.name = $('deckNameInput').value.trim();
+    if ($('commanderInput').value.trim()) options.commanderNames = $('commanderInput').value;
+    const deck = DeckCore.parseList($('deckText').value, options);
+    if (deck.format === 'commander' && !deck.commanders.length) throw Error('Add a commander using the commander field or a Commander section in the list.');
+    await importDeck(deck);
+  } catch (e) { importError(e); }
+};
+$('importBtn').onclick = $('emptyImport').onclick = () => $('importModal').showModal();
+$('newBtn').onclick = () => fresh();
+$('mullBtn').onclick = () => { if (st.m < 7 + Number(multiplayer())) { st.m++; fresh(false); } };
+$('keepHandBtn').onclick = () => { st.choice = 'keep'; st.reveal = true; st.bottom = Math.min(st.hand.length, Math.max(0, st.m - Number(multiplayer()))); render(); };
+$('drawBtn').onclick = () => { if (!st.bottom && st.lib.length) { st.hand.push(st.lib.shift()); st.reveal = true; render(); } };
+$('reveal').onclick = () => { st.reveal = true; renderCoach(); };
+document.querySelectorAll('[data-d]').forEach(button => button.onclick = () => {
+  st.choice = button.dataset.d; st.reveal = true;
+  if (st.choice === 'keep') st.bottom = Math.min(st.hand.length, Math.max(0, st.m - Number(multiplayer())));
+  render();
+});
+$('gameMode').onchange = () => { evaluationCache = null; renderCoach(); };
+$('retryAnalysis').onclick = () => void runAI();
+$('routesBtn').onclick = () => {
+  if (!loaded) return;
+  const { profile, facts } = loaded;
+  $('routeLibrary').innerHTML = `<h3>${esc(profile.archetype)}</h3><p>${esc(profile.summary)}</p><p>${esc(profile.commanderRole)}</p><h3>Opening priorities</h3><ul>${profile.priorities.map(p => `<li>${esc(p)}</li>`).join('')}</ul><h3>Deck composition</h3><p>${facts.total} library cards · ${facts.lands} land options (${facts.modalLands} modal) · ${facts.averageMV} average spell value</p><div class="deck-counts">${Object.entries(facts.counts).filter(([, n]) => n).map(([role, n]) => `<span>${esc(role)} <b>${n}</b></span>`).join('')}</div><p class="muted">Roles inferred from card text can overlap. Spell/land cards count in both relevant categories.</p><h3>Candidate win routes</h3>${routesHtml(currentAnalysis().routes)}<h3>Mulligan priorities</h3><ul>${profile.mulligan.priorities.map(p => `<li>${esc(p)}</li>`).join('')}</ul>${profile.limitations.length ? `<h3>Analysis limitations</h3><ul>${profile.limitations.map(p => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}`;
+  $('routesModal').showModal();
+};
+document.querySelectorAll('[data-close]').forEach(button => button.onclick = () => $(button.dataset.close).close());
+document.querySelectorAll('.dropzone').forEach(el => {
+  el.ondragover = e => { e.preventDefault(); el.classList.add('drag-over'); };
+  el.ondragleave = () => el.classList.remove('drag-over');
+  el.ondrop = e => { e.preventDefault(); el.classList.remove('drag-over'); try { const d = JSON.parse(e.dataTransfer.getData('text/plain')); move(d.index, d.zone, el.dataset.drop, d.name); } catch {} };
+});
+$('contextCoach').onmouseenter = () => clearTimeout(contextTimer);
+$('contextCoach').onmouseleave = () => { contextTimer = setTimeout(clearContext, 200); };
+try {
+  const saved = JSON.parse(localStorage.getItem(STORAGE));
+  if (saved?.version === DeckCore.VERSION && saved.deck?.cards?.length && saved.profile?.version === DeckCore.VERSION) {
+    DeckCore.normalizeDeck(saved.deck);
+    if (saved.profile.source === 'ai') DeckCore.validateProfile(saved.profile, saved.deck, saved.metadata, saved.facts);
+    loaded = saved; $('gameMode').value = /commander|edh/.test(saved.deck.format) ? 'multiplayer' : 'play'; fresh();
+  }
+} catch { loaded = null; }
+render();
