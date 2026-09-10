@@ -153,7 +153,15 @@
       if (typeof c.note !== 'string' || c.note.length > 500) throw Error('Invalid card note.');
       return { name: c.name, roles: unique([...roles.filter(r => r !== 'land'), ...(isLand(metadata[c.name]) ? ['land'] : [])]), note: c.note.trim() };
     });
-    if (unique(cards.map(c => c.name)).length !== cards.length) throw Error('Duplicate profile cards.');
+    // A model may repeat a card while describing multiple strategic roles.
+    // Each entry has already passed name, role, and note validation above.
+    const mergedCards = new Map();
+    for (const card of cards) {
+      const existing = mergedCards.get(card.name);
+      if (existing) { existing.roles = unique([...existing.roles, ...card.roles]); if (!existing.note) existing.note = card.note; }
+      else mergedCards.set(card.name, card);
+    }
+    cards.splice(0, cards.length, ...mergedCards.values());
     for (const name of names) if (!cards.some(c => c.name === name)) cards.push({ name, roles: facts.cardRoles[name], note: '' });
     const mulligan = raw.mulligan;
     if (!mulligan || !Number.isInteger(mulligan.landsMin) || !Number.isInteger(mulligan.landsMax) || mulligan.landsMin < 1 || mulligan.landsMax > 5 || mulligan.landsMin > mulligan.landsMax) throw Error('Invalid mulligan targets.');
