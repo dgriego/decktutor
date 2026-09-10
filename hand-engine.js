@@ -55,7 +55,7 @@
 
   function manaUnits(face, identity, label) {
     const t = face?.text || '';
-    const match = t.match(/(?:^|\n)\{T\}: Add ([^.\n]+)/);
+    const match = t.match(/(?:^|\n)\(?\{T\}: Add ([^.\n]+)/);
     if (!match || /only|unless|for each|among|that a land|activate only/i.test(match[1] + t.slice(match.index + match[0].length).split('\n')[0])) return [];
     const chunk = match[1];
     let colors = unique([...chunk.matchAll(/\{([WUBRGC])\}/g)].map(m => m[1]));
