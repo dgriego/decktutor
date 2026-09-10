@@ -78,6 +78,27 @@ test('strategy weights are validated and commander dependence changes the hand d
   const evaluated = H.evaluate(hand, deck, metadata, manaOnly);
   assert.equal(evaluated.score, evaluated.scores.mana);
 });
+test('validated duplicate AI entries merge roles without admitting invalid entries', () => {
+  const { deck, facts, profile } = setup(['Plains', 'Mountain', 'Rock', 'Value', 'Spark', 'Guard', 'Wastes']);
+  const raw = { ...profile, cards: [{ name: 'Guard', roles: ['enabler'], note: 'Early play.' }, { name: 'Guard', roles: ['protection'], note: 'Protect it.' }] };
+  const valid = C.validateProfile(raw, deck, metadata, facts);
+  assert.equal(valid.cards.filter(c => c.name === 'Guard').length, 1);
+  assert.deepEqual(valid.cards.find(c => c.name === 'Guard').roles, ['enabler', 'protection']);
+  assert.throws(() => C.validateProfile({ ...raw, cards: [...raw.cards, { name: 'Guard', roles: ['fake'], note: '' }] }, deck, metadata, facts), /role/);
+});
+test('parenthesized land mana pays for Sol Ring and remains a single flexible source', () => {
+  const fountain = card('Fountain', '', 'Land — Plains Island', '({T}: Add {W} or {U}.)\nAs this land enters, you may pay 2 life. If you don’t, it enters tapped.');
+  const units = H.manaUnits(fountain, [], 'Fountain');
+  assert.equal(units.length, 1);
+  assert.deepEqual(units[0].colors, ['W', 'U']);
+  assert.ok(H.pay('{1}', units));
+  assert.equal(H.pay('{W}{U}', units), null);
+  const hand = ['Fountain', 'Rock', 'Value', 'Value', 'Value', 'Value', 'Value'];
+  const deck = C.normalizeDeck({ cards: hand.map(name => ({ name })) });
+  const md = { ...metadata, Fountain: fountain };
+  const profile = C.fallbackProfile(deck, md, C.buildFacts(deck, md));
+  assert.equal(H.simulate(hand, deck, md, profile).earliest.Rock, 1);
+});
 test('mana distinguishes red, white, and required colorless and handles hybrids', () => {
   const unit = colors => ({ colors });
   assert.equal(H.pay('{R}', [unit(['W'])]), null);
